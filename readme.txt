@@ -33,7 +33,7 @@ Of course, nothing we do conflicts with any of those systems. We're just (hopefu
 
 = How long before I start seeing stats? =
 
-It may take as long as 20 minutes the first time you use it.
+It may take as long as 20 minutes the first time you use it. After that they should update every 3 minutes or so.
 
 = Does it count my own hits? =
 
