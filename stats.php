@@ -2,7 +2,7 @@
 /*
 Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
-Description: Tracks views, post/page views, referrers, and clicks.
+Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Andy Skelton
 Version: 1.0
 

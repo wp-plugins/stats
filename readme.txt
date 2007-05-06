@@ -42,3 +42,9 @@ It does not count the hits of logged in admin users.
 = What if the stats don't start showing up? Do I need anything special in my theme? =
 
 Yes, your theme must have a call to `<?php wp_footer(); ?>` at the very bottom right before the `</body>` tag.
+
+= Can I hide the smiley? =
+
+Sure, just don't use `display:none`, try this code:
+
+`img#wpstats{width:0px;height:0px;overflow:hidden;}`
