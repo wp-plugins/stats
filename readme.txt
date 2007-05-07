@@ -48,3 +48,11 @@ Yes, your theme must have a call to `<?php wp_footer(); ?>` at the very bottom r
 Sure, just don't use `display:none`, try this code:
 
 `img#wpstats{width:0px;height:0px;overflow:hidden;}`
+
+= Is it compatible with WP-Cache? =
+
+The plugin collects stats via a javascript call, so as long as the JS call is on the page stats will be collected just fine, whether the page is cached or not.
+
+= Can I use the same API key on multiple blogs? =
+
+Just like with Akismet, you're welcome to use the same API key on multiple blogs. In fact our interface is optimized for quickly switching between stats for multiple blogs.
