@@ -47,7 +47,7 @@ Yes, your theme must have a call to `<?php wp_footer(); ?>` at the very bottom r
 
 Sure, just don't use `display:none`, try this code:
 
-`img#wpstats{width:0px;height:0px;overflow:hidden;}`
+`img#wpstats{width:0px;height:0px;padding:0px;border:none;overflow:hidden}`
 
 = Is it compatible with WP-Cache? =
 
