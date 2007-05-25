@@ -190,14 +190,10 @@ function stats_admin_page() {
 
 <?php	if ( empty( $GLOBALS['stats_wpcom_api_key'] ) ) : ?>
 			<form action="plugins.php?page=<?php echo $plugin_page; ?>" method="post">
-				<p><?php _e('Enter your WordPress.com API key to link this blog to your WordPress.com account. (<a href="http://wordpress.com/profile/">Get your key here.</a>)'); ?></p>
+				<p><?php _e('Enter your WordPress.com API key to link this blog to your WordPress.com account. Be sure to use your own API key! Using any other key will lock you out of your stats. (<a href="http://wordpress.com/profile/">Get your key here.</a>)'); ?></p>
 				<label for="api_key"><?php _e('API Key:'); ?> <input type="text" name="api_key" id="api_key" value="<?php echo $api_key; ?>" /></label>
 				<input type="hidden" name="action" value="get_blog_id" />
 				<p class="submit"><input type="submit" value="<?php _e('Save &raquo;'); ?>" /></p>
-<?php		if ( !isset($wpcom_api_key) && $key = get_option('wordpress_api_key') ) : ?>
-				<p><?php printf(__('This API key was found in your database: <strong>%s</strong>.'), $key); ?></p>
-				<p class="submit"><input type="submit" value="<?php _e('Use this key &#187;'); ?>" name="usesavedkey" /></p>
-<?php		endif; ?>
 			</form>
 <?php	else : ?>
 			<p><?php _e('An API Key is present in the source code but it did not work.') ?></p>
