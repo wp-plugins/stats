@@ -1,4 +1,4 @@
-=== Automattic Stats ===
+=== WordPress.com Stats ===
 Contributors: skeltoac
 Tags: stats, statistics
 Requires at least: 2.1

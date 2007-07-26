@@ -113,8 +113,8 @@ function stats_array($kvs) {
 
 function stats_admin_menu() {
 	if ( stats_get_option('blog_id') ) {
-		$hook = add_submenu_page('index.php', __('Blog Stats'), __('Blog Stats'), 'manage_options', 'stats', 'stats_redirect');
-		add_action("load-$hook", 'stats_redirect');
+		$hook = add_submenu_page('index.php', __('Blog Stats'), __('Blog Stats'), 'manage_options', 'stats', 'stats_reports_page');
+		add_action("load-$hook", 'stats_reports_load');
 	}
 	$hook = add_submenu_page('plugins.php', __('WordPress.com Stats Plugin'), __('WordPress.com Stats'), 'manage_options', 'wpstats', 'stats_admin_page');
 	add_action("load-$hook", 'stats_admin_load');
@@ -122,13 +122,22 @@ function stats_admin_menu() {
 	add_action('admin_notices', 'stats_admin_notices');
 }
 
-function stats_redirect() {
-	$blog_id = stats_get_option('blog_id');
+function stats_reports_load() {
+	add_action('admin_head', 'stats_reports_head');
+}
 
-	if ( $blog_id ) {
-		header("Location: http://dashboard.wordpress.com/wp-admin/index.php?page=stats&blog=$blog_id");
-		exit;
-	}
+function stats_reports_head() {
+?>
+<style type="text/css">
+	body { height: 100%; }
+	#statsreport { height: 2500px; width: 100%; }
+</style>
+<?php
+}
+
+function stats_reports_page() {
+	$blog_id = stats_get_option('blog_id');
+	echo "<iframe id='statsreport' frameborder='0' src='http://blogamist.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true'></iframe>";
 }
 
 function stats_admin_load() {
@@ -202,7 +211,7 @@ function stats_admin_page() {
 <?php else : ?>
 			<p><?php _e('The WordPress.com Stats Plugin is configured and working.'); ?></p>
 			<p><?php _e('Visitors who are logged in are not counted. (This means you.)'); ?></p>
-			<p><?php printf(__('Visit <a href="%s">your WordPress.com Dashboard</a> to see your blog stats.'), 'http://dashboard.wordpress.com/wp-admin/index.php?page=stats&blog=' . $options['blog_id']); ?></p>
+			<p><?php printf(__('Visit <a href="%s">your Dashboard</a> to see your blog stats.'), 'index.php?page=stats'); ?></p>
 <?php endif; ?>
 
 		</div>
