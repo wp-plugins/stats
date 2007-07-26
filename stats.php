@@ -137,7 +137,7 @@ function stats_reports_head() {
 
 function stats_reports_page() {
 	$blog_id = stats_get_option('blog_id');
-	echo "<iframe id='statsreport' frameborder='0' src='http://blogamist.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true'></iframe>";
+	echo "<iframe id='statsreport' frameborder='0' src='http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true'></iframe>";
 }
 
 function stats_admin_load() {
