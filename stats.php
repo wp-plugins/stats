@@ -233,6 +233,7 @@ function stats_xmlrpc_methods( $methods ) {
 function stats_get_posts( $args ) {
 	list( $post_ids ) = $args;
 	
+	$post_ids = array_map( 'intval', (array) $post_ids );
 	$r = 'include=' . join(',', $post_ids);
 	$posts = get_posts( $r );
 	$_posts = array();
