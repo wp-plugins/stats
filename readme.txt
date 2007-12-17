@@ -16,6 +16,14 @@ Once it's running it'll begin collecting information about your pageviews, which
 
 Finally, because all of the processing and collection runs on our servers and not yours, it doesn't cause any additional load on your hosting account. In fact, it's one of the fastest stats system, hosted or not hosted, that you can use.
 
+== Screenshots ==
+
+1. Your stats are displayed in a frame on your own blog's dashboard. There are graphs and several sections of charts below. You will need to be logged in at WordPress.com to see the stats. If you see a login box here, use your WordPress.com login.
+
+2. Each post has its own graph.
+
+3. You can add other WordPress.com users to the list of people allowed to see your stats.
+
 == Installation ==
 
 Installing should be a piece of cake and take fewer than five minutes.
