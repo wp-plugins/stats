@@ -1,5 +1,5 @@
 === WordPress.com Stats ===
-Contributors: skeltoac
+Contributors: skeltoac, mdawaffe
 Tags: stats, statistics
 Requires at least: 2.1
 Tested up to: 2.3-alpha

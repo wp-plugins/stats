@@ -4,7 +4,7 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Andy Skelton
-Version: 1.1.1
+Version: 1.2-alpha
 
 Requires WordPress 2.1 or later. Not for use with WPMU.
 
@@ -115,6 +115,18 @@ function stats_admin_menu() {
 	if ( stats_get_option('blog_id') ) {
 		$hook = add_submenu_page('index.php', __('Blog Stats'), __('Blog Stats'), 'manage_options', 'stats', 'stats_reports_page');
 		add_action("load-$hook", 'stats_reports_load');
+		if ( file_exists( ABSPATH . 'wp-admin/includes/dashboard.php' ) ) {
+			global $submenu;
+			$dash = false;
+			foreach ( $submenu['index.php'] as $s => $sub ) {
+				if ( 'stats' == $sub[2] )
+					unset($submenu['index.php'][$s]);
+				elseif ( 'index.php' == $sub[2] )
+					$dash = $s;
+			}
+			if ( count($submenu['index.php']) < 2 && is_int($dash) )
+				unset($submenu['index.php'][$dash]);
+		}
 	}
 	$hook = add_submenu_page('plugins.php', __('WordPress.com Stats Plugin'), __('WordPress.com Stats'), 'manage_options', 'wpstats', 'stats_admin_page');
 	add_action("load-$hook", 'stats_admin_load');
@@ -136,6 +148,8 @@ function stats_reports_head() {
 }
 
 function stats_reports_page() {
+	if ( isset( $_GET['noheader'] ) )
+		return stats_dashboard_widget_content();
 	$blog_id = stats_get_option('blog_id');
 	echo "<iframe id='statsreport' frameborder='0' src='http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true'></iframe>";
 }
@@ -319,17 +333,6 @@ function stats_flush_posts() {
 	);
 }
 
-function stats_activity() {
-	$options = stats_get_options();
-
-	if ( $options['blog_id'] ) {
-		?>
-		<h3><?php _e('WordPress.com Blog Stats'); ?></h3>
-		<p><?php printf(__('Visit %s to see your blog stats.'), '<a href="http://dashboard.wordpress.com/wp-admin/index.php?page=stats&blog=' . $options['blog_id'] . '">' . __('your Global Dashboard') . '</a>'); ?></p>
-		<?php
-	}
-}
-
 function stats_get_blog_id($api_key) {
 	$options = stats_get_options();
 
@@ -383,11 +386,195 @@ function stats_deactivate() {
 	delete_option('stats_options');
 }
 
+/* Dashboard Stuff */
+
+function stats_register_dashboard_widget() {
+	if ( ( !$blog_id = stats_get_option('blog_id') ) || !stats_get_api_key() )
+		return;
+
+	// wp_dashboard_empty: we load in the content after the page load via JS
+	wp_register_sidebar_widget( 'dashboard_stats', __( 'Stats' ), 'wp_dashboard_empty', array(
+		'all_link' => "http://dashboard.wordpress.com/wp-admin/index.php?page=stats&blog=$blog_id",
+		'width' => 'full'
+	) );
+
+	add_action( 'admin_head', 'stats_dashboard_head' );
+}
+
+function stats_add_dashboard_widget( $widgets ) {
+	global $wp_registered_widgets;
+	if ( !isset($wp_registered_widgets['dashboard_stats']) )
+		return $widgets;
+
+	array_splice( $widgets, 2, 0, 'dashboard_stats' );
+	return $widgets;
+}
+
+// Javascript and CSS for dashboard widget
+function stats_dashboard_head() { ?>
+<script type="text/javascript">
+/* <![CDATA[ */
+jQuery( function($) {
+	var dashStats = $('#dashboard_stats div.dashboard-widget-content');
+	var h = parseInt( dashStats.parent().height() ) - parseInt( dashStats.prev().height() );
+	dashStats.not( '.dashboard-widget-control' ).load('index.php?page=stats&noheader&width=' + dashStats.width() + '&height=' + h.toString() );
+} );
+/* ]]> */
+</script>
+<style type="text/css">
+/* <![CDATA[ */
+#dashboard_stats .dashboard-widget-content {
+	margin: 15px;
+}
+#stats-graph {
+	width: 50%;
+	float: left;
+}
+#stats-info {
+	width: 49%;
+	float: left;
+}
+#stats-info h4 {
+	margin-top: 0;
+}
+#stats-info div {
+	margin-left: 30px;
+}
+/* ]]> */
+</style>
+<?php
+}
+
+function stats_get_csv( $table, $args = null ) {
+	$blog_id = stats_get_option('blog_id');
+	$key = stats_get_api_key();
+
+	if ( !$blog_id || !$key )
+		return array();
+
+	$defaults = array( 'end' => false, 'days' => false, 'limit' => 3, 'post_id' => false, 'summarize' => '' );
+
+	$args = wp_parse_args( $args, $defaults );
+	$args['table'] = $table;
+	$args['blog_id'] = $blog_id;
+	$args['api_key'] = $key;
+
+	$stats_csv_url = add_query_arg( $args, 'http://stats.wordpress.com/csv.php' );
+
+	if ( !$stats = stats_get_remote_csv( $stats_csv_url ) )
+		return array();
+
+	$labels = array_shift( $stats );
+
+	if ( 0 === stripos( $labels[0], 'error' ) )
+		return array();
+
+	$stats_rows = array();
+	for ( $s = 0; isset($stats[$s]); $s++ ) {
+		$row = array();
+		foreach ( $labels as $col => $label )
+			$row[$label] = $stats[$s][$col];
+		$stats_rows[] = $row;
+	}
+
+	return $stats_rows;
+}
+
+function stats_get_remote_csv( $url ) {
+	$url = clean_url( $url, null, 'url' );
+
+	// Yay!
+	if ( ini_get('allow_url_fopen') ) {
+		$fp = @fopen($url, 'r');
+		if ( !$fp )
+			return false;
+
+		//stream_set_timeout($fp, $timeout); // Requires php 4.3
+		$data = array();
+		while ( $remote_read = fgetcsv($fp, 1000) )
+			$data[] = $remote_read;
+		fclose($fp);
+		return $data;
+	}
+
+	// Boo - we need to use wp_remote_fopen for maximium compatibility
+	if ( !$csv = wp_remote_fopen( $url ) )
+		return false;
+
+	return stats_str_getcsv( $csv );
+}
+
+// rather than parsing the csv and its special cases, we create a new file and do fgetcsv on it.
+function stats_str_getcsv( $csv ) {
+	if ( !$temp = tmpfile() )
+		return false;
+
+	$data = array();
+
+	fwrite($temp, $csv, strlen($csv));
+	fseek($temp, 0);
+	while ( false !== $row = fgetcsv($temp, 1000) )
+		$data[] = $row;
+	fclose($temp);
+
+	return $data;
+}
+
+function stats_dashboard_widget_content() {
+	$blog_id = stats_get_option('blog_id');
+	if ( ( !$width  = (int) ( $_GET['width'] / 2 ) ) || $width  < 250 )
+		$width  = 375;
+	if ( ( !$height = (int) $_GET['height'] - 31 )   || $height < 250 )
+		$height = 300;
+
+	echo "<iframe id='stats-graph' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&width=$width&height=$height'></iframe>";
+
+	$post_ids = array();
+
+	foreach ( $top_posts = stats_get_csv( 'postviews' ) as $post )
+		$post_ids[] = $post['post_id'];
+	foreach ( $active_posts = stats_get_csv( 'postviews', 'days=3' ) as $post )
+		$post_ids[] = $post['post_id'];
+
+	// cache
+	get_posts( array( 'include' => join( ',', array_unique($post_ids) ) ) );
+
+	$searches = array();
+	foreach ( $search_terms = stats_get_csv( 'searchterms', 'days=3' ) as $search_term )
+		$searches[] = $search_term['searchterm'];
+
+?>
+<div id="stats-info">
+	<div id="top-posts">
+		<h4><?php _e( 'Top Posts' ); ?></h4>
+		<?php foreach ( $top_posts as $top_post ) : if ( !get_post( $top_post['post_id'] ) ) continue; ?>
+		<p><?php printf( __( '%s, %d views' ), get_permalink( $top_post['post_id'] ), $top_post['views'] ); ?></p>
+		<?php endforeach; ?>
+	</div>
+	<div id="top-search">
+		<h4><?php _e( 'Top Searches' ); ?></h4>
+		<?php echo join( ', ', $searches ); ?>
+	</div>
+	<div id="active">
+		<h4><?php _e( 'Most Active' ); ?></h4>
+		<?php foreach ( $active_posts as $active_post ) : if ( !get_post( $active_post['post_id'] ) ) continue; ?>
+		<p><?php printf( __( '%s, %d views' ), get_permalink( $active_post['post_id'] ), $active_post['views'] ); ?></p>
+		<?php endforeach; ?>
+	</div>
+</div>
+<br class="clear" />
+<?php
+	exit;
+}
+
+add_action( 'wp_dashboard_setup', 'stats_register_dashboard_widget' );
+add_filter( 'wp_dashboard_widgets', 'stats_add_dashboard_widget' );
+
+
 // Boooooooooooring init stuff
 register_activation_hook(__FILE__, 'stats_activate');
 register_deactivation_hook(__FILE__, 'stats_deactivate');
 add_action( 'admin_menu', 'stats_admin_menu' );
-add_action( 'activity_box_end', 'stats_activity', 1 );
 
 // Plant the tracking code in the footer
 add_action( 'wp_footer', 'stats_footer', 101 );
