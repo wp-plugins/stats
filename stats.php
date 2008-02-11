@@ -548,7 +548,11 @@ function stats_dashboard_widget_content() {
 	<div id="top-posts">
 		<h4><?php _e( 'Top Posts' ); ?></h4>
 		<?php foreach ( $top_posts as $top_post ) : if ( !get_post( $top_post['post_id'] ) ) continue; ?>
-		<p><?php printf( __( '%s, %d views' ), get_permalink( $top_post['post_id'] ), $top_post['views'] ); ?></p>
+		<p><?php printf(
+			__( '%s, %d views' ),
+			'<a href="' . get_permalink( $top_post['post_id'] ) . '">' . get_the_title( $top_post['post_id'] ) . '</a>',
+			$top_post['views']
+		); ?></p>
 		<?php endforeach; ?>
 	</div>
 	<div id="top-search">
@@ -558,7 +562,11 @@ function stats_dashboard_widget_content() {
 	<div id="active">
 		<h4><?php _e( 'Most Active' ); ?></h4>
 		<?php foreach ( $active_posts as $active_post ) : if ( !get_post( $active_post['post_id'] ) ) continue; ?>
-		<p><?php printf( __( '%s, %d views' ), get_permalink( $active_post['post_id'] ), $active_post['views'] ); ?></p>
+		<p><?php printf(
+			__( '%s, %d views' ),
+			'<a href="' . get_permalink( $active_post['post_id'] ) . '">' . get_the_title( $active_post['post_id'] ) . '</a>',
+			$active_post['views']
+		); ?></p>
 		<?php endforeach; ?>
 	</div>
 </div>
