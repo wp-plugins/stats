@@ -140,7 +140,7 @@ function stats_reports_page() {
 		return stats_dashboard_widget_content();
 	$blog_id = stats_get_option('blog_id');
 	$day = isset( $_GET['day'] ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $_GET['day'] ) ? "&day=$_GET[day]" : '';
-	echo "<iframe id='statsreport' frameborder='0' src='http://lufthosen.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true$day'></iframe>";
+	echo "<iframe id='statsreport' frameborder='0' src='http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true$day'></iframe>";
 }
 
 function stats_admin_load() {
@@ -525,7 +525,7 @@ function stats_dashboard_widget_content() {
 	$_width  = $width  - 5;
 	$_height = $height - 5;
 
-	echo "<iframe id='stats-graph' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='http://lufthosen.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&width=$_width&height=$_height'></iframe>";
+	echo "<iframe id='stats-graph' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&width=$_width&height=$_height'></iframe>";
 
 	$post_ids = array();
 
