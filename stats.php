@@ -456,21 +456,47 @@ function stats_get_csv( $table, $args = null ) {
 
 	$stats_csv_url = add_query_arg( $args, 'http://stats.wordpress.com/csv.php' );
 
-	if ( !$stats = stats_get_remote_csv( $stats_csv_url ) )
-		return array();
+	$key = md5( $stats_csv_url );
 
-	$labels = array_shift( $stats );
+	// Get cache
+	if ( !$stats_cache = get_option( 'stats_cache' ) )
+		$stats_cache = array();
 
-	if ( 0 === stripos( $labels[0], 'error' ) )
-		return array();
+	// Return or expire this key
+	if ( isset($stats_cache[$key]) ) {
+		$time = key($stats_cache[$key]);
+		if ( time() - $time < 300 )
+			return $stats_cache[$key][$time];
+		unset( $stats_cache[$key] );
+	}
 
 	$stats_rows = array();
-	for ( $s = 0; isset($stats[$s]); $s++ ) {
-		$row = array();
-		foreach ( $labels as $col => $label )
-			$row[$label] = $stats[$s][$col];
-		$stats_rows[] = $row;
-	}
+	do {
+		if ( !$stats = stats_get_remote_csv( $stats_csv_url ) )
+			break;
+
+		$labels = array_shift( $stats );
+
+		if ( 0 === stripos( $labels[0], 'error' ) )
+			break;
+
+		$stats_rows = array();
+		for ( $s = 0; isset($stats[$s]); $s++ ) {
+			$row = array();
+			foreach ( $labels as $col => $label )
+				$row[$label] = $stats[$s][$col];
+			$stats_rows[] = $row;
+		}
+	} while(0);
+
+	// Expire old keys
+	foreach ( $stats_cache as $k => $cache )
+		if ( !is_array($cache) || 300 < time() - key($cache) )
+			unset($stats_cache[$k]);
+
+	// Set cache
+	$stats_cache[$key] = array( time() => $stats_rows );
+	update_option( 'stats_cache', $stats_cache );
 
 	return $stats_rows;
 }
