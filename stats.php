@@ -41,7 +41,7 @@ function stats_get_options() {
 
 function stats_get_option( $option ) {
 	$options = stats_get_options();
-	
+
 	if ( isset( $options[$option] ) )
 		return $options[$option];
 
@@ -115,18 +115,6 @@ function stats_admin_menu() {
 	if ( stats_get_option('blog_id') ) {
 		$hook = add_submenu_page('index.php', __('Blog Stats'), __('Blog Stats'), 'manage_options', 'stats', 'stats_reports_page');
 		add_action("load-$hook", 'stats_reports_load');
-		if ( file_exists( ABSPATH . 'wp-admin/includes/dashboard.php' ) ) {
-			global $submenu;
-			$dash = false;
-			foreach ( $submenu['index.php'] as $s => $sub ) {
-				if ( 'stats' == $sub[2] )
-					unset($submenu['index.php'][$s]);
-				elseif ( 'index.php' == $sub[2] )
-					$dash = $s;
-			}
-			if ( count($submenu['index.php']) < 2 && is_int($dash) )
-				unset($submenu['index.php'][$dash]);
-		}
 	}
 	$hook = add_submenu_page('plugins.php', __('WordPress.com Stats Plugin'), __('WordPress.com Stats'), 'manage_options', 'wpstats', 'stats_admin_page');
 	add_action("load-$hook", 'stats_admin_load');
@@ -151,7 +139,8 @@ function stats_reports_page() {
 	if ( isset( $_GET['noheader'] ) )
 		return stats_dashboard_widget_content();
 	$blog_id = stats_get_option('blog_id');
-	echo "<iframe id='statsreport' frameborder='0' src='http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true'></iframe>";
+	$day = isset( $_GET['day'] ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $_GET['day'] ) ? "&day=$_GET[day]" : '';
+	echo "<iframe id='statsreport' frameborder='0' src='http://lufthosen.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true$day'></iframe>";
 }
 
 function stats_admin_load() {
@@ -394,7 +383,7 @@ function stats_register_dashboard_widget() {
 
 	// wp_dashboard_empty: we load in the content after the page load via JS
 	wp_register_sidebar_widget( 'dashboard_stats', __( 'Stats' ), 'wp_dashboard_empty', array(
-		'all_link' => "http://dashboard.wordpress.com/wp-admin/index.php?page=stats&blog=$blog_id",
+		'all_link' => 'index.php?page=stats',
 		'width' => 'full'
 	) );
 
@@ -424,7 +413,7 @@ jQuery( function($) {
 <style type="text/css">
 /* <![CDATA[ */
 #dashboard_stats .dashboard-widget-content {
-	margin: 15px;
+	margin-top: 15px;
 }
 #stats-graph {
 	width: 50%;
@@ -434,11 +423,17 @@ jQuery( function($) {
 	width: 49%;
 	float: left;
 }
-#stats-info h4 {
-	margin-top: 0;
-}
 #stats-info div {
-	margin-left: 30px;
+	margin: 0 0 1em 30px;
+}
+#stats-info div#active {
+	margin-bottom: 0;
+}
+#stats-info h4 {
+	margin: 0 0 .3em;
+}
+#stats-info p {
+	margin: 0;
 }
 /* ]]> */
 </style>
@@ -524,10 +519,13 @@ function stats_dashboard_widget_content() {
 	$blog_id = stats_get_option('blog_id');
 	if ( ( !$width  = (int) ( $_GET['width'] / 2 ) ) || $width  < 250 )
 		$width  = 375;
-	if ( ( !$height = (int) $_GET['height'] - 31 )   || $height < 250 )
-		$height = 300;
+	if ( ( !$height = (int) $_GET['height'] - 31 )   || $height < 270 )
+		$height = 270;
 
-	echo "<iframe id='stats-graph' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&width=$width&height=$height'></iframe>";
+	$_width  = $width  - 5;
+	$_height = $height - 5;
+
+	echo "<iframe id='stats-graph' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='http://lufthosen.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&width=$_width&height=$_height'></iframe>";
 
 	$post_ids = array();
 
@@ -557,7 +555,7 @@ function stats_dashboard_widget_content() {
 	</div>
 	<div id="top-search">
 		<h4><?php _e( 'Top Searches' ); ?></h4>
-		<?php echo join( ', ', $searches ); ?>
+		<p><?php echo join( ', ', $searches );?></p>
 	</div>
 	<div id="active">
 		<h4><?php _e( 'Most Active' ); ?></h4>
