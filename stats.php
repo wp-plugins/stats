@@ -413,7 +413,7 @@ jQuery( function($) {
 <style type="text/css">
 /* <![CDATA[ */
 #dashboard_stats .dashboard-widget-content {
-	margin-top: 15px;
+	padding-top: 25px;
 }
 #stats-graph {
 	width: 50%;
@@ -430,6 +430,7 @@ jQuery( function($) {
 	margin-bottom: 0;
 }
 #stats-info h4 {
+	font-size: 1em;
 	margin: 0 0 .3em;
 }
 #stats-info p {
@@ -545,13 +546,15 @@ function stats_dashboard_widget_content() {
 	$blog_id = stats_get_option('blog_id');
 	if ( ( !$width  = (int) ( $_GET['width'] / 2 ) ) || $width  < 250 )
 		$width  = 375;
-	if ( ( !$height = (int) $_GET['height'] - 31 )   || $height < 270 )
+	if ( ( !$height = (int) $_GET['height'] - 36 )   || $height < 270 )
 		$height = 270;
 
 	$_width  = $width  - 5;
-	$_height = $height - 5;
+	$_height = $height - ( $GLOBALS['is_winIE'] ? 16 : 5 ); // hack!
 
-	echo "<iframe id='stats-graph' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&width=$_width&height=$_height'></iframe>";
+	$src = clean_url( "http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&width=$_width&height=$_height" );
+
+	echo "<iframe id='stats-graph' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='$src'></iframe>";
 
 	$post_ids = array();
 
