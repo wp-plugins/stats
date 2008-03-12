@@ -373,12 +373,13 @@ function stats_activate() {
 
 function stats_deactivate() {
 	delete_option('stats_options');
+	delete_option('stats_dashboard_widget');
 }
 
 /* Dashboard Stuff */
 
 function stats_register_dashboard_widget() {
-	if ( ( !$blog_id = stats_get_option('blog_id') ) || !stats_get_api_key() )
+	if ( ( !$blog_id = stats_get_option('blog_id') ) || !stats_get_api_key() || !current_user_can( 'manage_options' ) )
 		return;
 
 	// wp_dashboard_empty: we load in the content after the page load via JS
@@ -386,13 +387,77 @@ function stats_register_dashboard_widget() {
 		'all_link' => 'index.php?page=stats',
 		'width' => 'full'
 	) );
+	wp_register_widget_control( 'dashboard_stats', __( 'Stats' ), 'stats_register_dashboard_widget_control', array(), array(
+		'widget_id' => 'dashboard_stats',
+	) );
 
 	add_action( 'admin_head', 'stats_dashboard_head' );
 }
 
+function stats_dashboard_widget_options() {
+	$defaults = array( 'chart' => 1, 'top' => -1, 'search' => 7, 'active' => 7 );
+	if ( ( !$options = get_option( 'stats_dashboard_widget' ) ) || !is_array($options) )
+		$options = array();
+	return array_merge( $defaults, $options );
+}
+
+function stats_register_dashboard_widget_control() {
+	$periods   = array( '1' => __('day'), '7' => __('week'), '31' => __('month') );
+	$intervals = array( '-1' => __('all time'), '1' => __('the past day'), '7' => __('the past week'), '31' => __('the past month'), '90' => __('the past quarter'), '365' => __('the past year') );
+	$options = stats_dashboard_widget_options();
+
+
+	if ( 'post' == strtolower($_SERVER['REQUEST_METHOD']) && isset( $_POST['widget_id'] ) && 'dashboard_stats' == $_POST['widget_id'] ) {
+		if ( isset($periods[$_POST['chart']]) )
+			$options['chart'] = $_POST['chart'];
+		foreach ( array( 'top', 'search', 'active' ) as $key )
+			if ( isset($intervals[$_POST[$key]]) )
+				$options[$key] = $_POST[$key];
+		update_option( 'stats_dashboard_widget', $options );
+	}
+?>
+	<p>
+		<label for="chart"><?php _e( 'Chart stats by' ); ?></label>
+		<select id="chart" name="chart">
+<?php foreach ( $periods as $val => $label ) : ?>
+			<option value="<?php echo $val; ?>"<?php selected( $val, $options['chart'] ); ?>><?php echo wp_specialchars( $label ); ?></option>
+<?php endforeach; ?>
+		</select>.
+	</p>
+
+	<p>
+		<label for="top"><?php _e( 'Show top posts over' ); ?></label>
+		<select id="top" name="top">
+<?php foreach ( $intervals as $val => $label ) : ?>
+			<option value="<?php echo $val; ?>"<?php selected( $val, $options['top'] ); ?>><?php echo wp_specialchars( $label ); ?></option>
+<?php endforeach; ?>
+		</select>.
+	</p>
+
+	<p>
+		<label for="search"><?php _e( 'Show top search terms over' ); ?></label>
+		<select id="search" name="search">
+<?php foreach ( $intervals as $val => $label ) : ?>
+			<option value="<?php echo $val; ?>"<?php selected( $val, $options['search'] ); ?>><?php echo wp_specialchars( $label ); ?></option>
+<?php endforeach; ?>
+		</select>.
+	</p>
+
+	<p>
+		<label for="active"><?php _e( 'Show most active posts over' ); ?></label>
+		<select id="active" name="active">
+<?php foreach ( $intervals as $val => $label ) : ?>
+			<option value="<?php echo $val; ?>"<?php selected( $val, $options['active'] ); ?>><?php echo wp_specialchars( $label ); ?></option>
+<?php endforeach; ?>
+		</select>.
+	</p>
+
+<?php
+}
+
 function stats_add_dashboard_widget( $widgets ) {
 	global $wp_registered_widgets;
-	if ( !isset($wp_registered_widgets['dashboard_stats']) )
+	if ( !isset($wp_registered_widgets['dashboard_stats']) || !current_user_can( 'manage_options' ) )
 		return $widgets;
 
 	array_splice( $widgets, 2, 0, 'dashboard_stats' );
@@ -528,7 +593,7 @@ function stats_get_remote_csv( $url ) {
 
 // rather than parsing the csv and its special cases, we create a new file and do fgetcsv on it.
 function stats_str_getcsv( $csv ) {
-	if ( !$temp = tmpfile() )
+	if ( !$temp = tmpfile() ) // tmpfile() automatically unlinks
 		return false;
 
 	$data = array();
@@ -545,54 +610,58 @@ function stats_str_getcsv( $csv ) {
 function stats_dashboard_widget_content() {
 	$blog_id = stats_get_option('blog_id');
 	if ( ( !$width  = (int) ( $_GET['width'] / 2 ) ) || $width  < 250 )
-		$width  = 375;
-	if ( ( !$height = (int) $_GET['height'] - 36 )   || $height < 270 )
-		$height = 270;
+		$width  = 370;
+	if ( ( !$height = (int) $_GET['height'] - 36 )   || $height < 230 )
+		$height = 230;
 
 	$_width  = $width  - 5;
 	$_height = $height - ( $GLOBALS['is_winIE'] ? 16 : 5 ); // hack!
 
-	$src = clean_url( "http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&width=$_width&height=$_height" );
+	$options = stats_dashboard_widget_options();
+
+	$src = clean_url( "http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&unit=$options[chart]&width=$_width&height=$_height" );
 
 	echo "<iframe id='stats-graph' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='$src'></iframe>";
 
 	$post_ids = array();
 
-	foreach ( $top_posts = stats_get_csv( 'postviews' ) as $post )
+	foreach ( $top_posts = stats_get_csv( 'postviews', "days=$options[top]" ) as $post )
 		$post_ids[] = $post['post_id'];
-	foreach ( $active_posts = stats_get_csv( 'postviews', 'days=3' ) as $post )
+	foreach ( $active_posts = stats_get_csv( 'postviews', "days=$options[active]" ) as $post )
 		$post_ids[] = $post['post_id'];
 
 	// cache
 	get_posts( array( 'include' => join( ',', array_unique($post_ids) ) ) );
 
 	$searches = array();
-	foreach ( $search_terms = stats_get_csv( 'searchterms', 'days=3' ) as $search_term )
+	foreach ( $search_terms = stats_get_csv( 'searchterms', "days=$options[search]" ) as $search_term )
 		$searches[] = $search_term['searchterm'];
 
 ?>
 <div id="stats-info">
 	<div id="top-posts">
 		<h4><?php _e( 'Top Posts' ); ?></h4>
-		<?php foreach ( $top_posts as $top_post ) : if ( !get_post( $top_post['post_id'] ) ) continue; ?>
+		<?php foreach ( $top_posts as $post ) : if ( !get_post( $post['post_id'] ) ) continue; ?>
 		<p><?php printf(
-			__( '%s, %d views' ),
-			'<a href="' . get_permalink( $top_post['post_id'] ) . '">' . get_the_title( $top_post['post_id'] ) . '</a>',
-			$top_post['views']
+			__( '%s, %s views' ),
+			'<a href="' . get_permalink( $post['post_id'] ) . '">' . get_the_title( $post['post_id'] ) . '</a>',
+//			'<a href="' . $post['post_permalink'] . '">' . $post['post_title'] . '</a>',
+			number_format_i18n( $post['views'] )
 		); ?></p>
 		<?php endforeach; ?>
 	</div>
 	<div id="top-search">
 		<h4><?php _e( 'Top Searches' ); ?></h4>
-		<p><?php echo join( ', ', $searches );?></p>
+		<p><?php echo join( ',&nbsp; ', $searches );?></p>
 	</div>
 	<div id="active">
 		<h4><?php _e( 'Most Active' ); ?></h4>
-		<?php foreach ( $active_posts as $active_post ) : if ( !get_post( $active_post['post_id'] ) ) continue; ?>
+		<?php foreach ( $active_posts as $post ) : if ( !get_post( $post['post_id'] ) ) continue; ?>
 		<p><?php printf(
-			__( '%s, %d views' ),
-			'<a href="' . get_permalink( $active_post['post_id'] ) . '">' . get_the_title( $active_post['post_id'] ) . '</a>',
-			$active_post['views']
+			__( '%s, %s views' ),
+			'<a href="' . get_permalink( $post['post_id'] ) . '">' . get_the_title( $post['post_id'] ) . '</a>',
+//			'<a href="' . $post['post_permalink'] . '">' . $post['post_title'] . '</a>',
+			number_format_i18n( $post['views'] )
 		); ?></p>
 		<?php endforeach; ?>
 	</div>
@@ -600,6 +669,10 @@ function stats_dashboard_widget_content() {
 <br class="clear" />
 <?php
 	exit;
+}
+
+if ( !function_exists('number_format_i18n') ) {
+	function number_format_i18n( $number, $decimals = null ) { return number_format( $number, $decimals ); }
 }
 
 add_action( 'wp_dashboard_setup', 'stats_register_dashboard_widget' );
