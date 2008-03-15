@@ -4,7 +4,7 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Andy Skelton
-Version: 1.2-alpha
+Version: 1.2
 
 Requires WordPress 2.1 or later. Not for use with WPMU.
 
@@ -322,6 +322,21 @@ function stats_flush_posts() {
 	);
 }
 
+// WP < 2.5
+function stats_activity() {
+	if ( did_action( 'rightnow_end' ) )
+		return;
+
+	$options = stats_get_options();
+
+	if ( $options['blog_id'] ) {
+		?>
+		<h3><?php _e('WordPress.com Blog Stats'); ?></h3>
+		<p><?php printf(__('Visit %s to see your blog stats.'), '<a href="http://dashboard.wordpress.com/wp-admin/index.php?page=stats&blog=' . $options['blog_id'] . '">' . __('your Global Dashboard') . '</a>'); ?></p>
+		<?php
+	}
+}
+
 function stats_get_blog_id($api_key) {
 	$options = stats_get_options();
 
@@ -376,7 +391,7 @@ function stats_deactivate() {
 	delete_option('stats_dashboard_widget');
 }
 
-/* Dashboard Stuff */
+/* Dashboard Stuff: WP >= 2.5 */
 
 function stats_register_dashboard_widget() {
 	if ( ( !$blog_id = stats_get_option('blog_id') ) || !stats_get_api_key() || !current_user_can( 'manage_options' ) )
@@ -683,6 +698,7 @@ add_filter( 'wp_dashboard_widgets', 'stats_add_dashboard_widget' );
 register_activation_hook(__FILE__, 'stats_activate');
 register_deactivation_hook(__FILE__, 'stats_deactivate');
 add_action( 'admin_menu', 'stats_admin_menu' );
+add_action( 'activity_box_end', 'stats_activity', 1 ); // WP < 2.5
 
 // Plant the tracking code in the footer
 add_action( 'wp_footer', 'stats_footer', 101 );
