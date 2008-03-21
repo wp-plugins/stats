@@ -46,7 +46,7 @@ It may take as long as 20 minutes the first time you use it. After that they sho
 
 = Does it count my own hits? =
 
-It does not count the hits of logged in admin users.
+It does not count the hits of logged in users.
 
 = What if the stats don't start showing up? Do I need anything special in my theme? =
 
