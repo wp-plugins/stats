@@ -87,7 +87,7 @@ function stats_footer() {
 
 	$a['blog'] = $options['blog_id'];
 	$a['v'] = 'ext';
-	if ( ( $wp_the_query->is_single || $wp_the_query->is_page ) && !$wp_the_query->is_attachment )
+	if ( $wp_the_query->is_single || $wp_the_query->is_page )
 		$a['post'] = $wp_the_query->get_queried_object_id();
 	else
 		$a['post'] = '0';
