@@ -4,7 +4,7 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Andy Skelton
-Version: 1.2.1
+Version: 1.2.2-alpha
 
 Requires WordPress 2.1 or later. Not for use with WPMU.
 
@@ -540,7 +540,8 @@ function stats_get_csv( $table, $args = null ) {
 	$key = md5( $stats_csv_url );
 
 	// Get cache
-	if ( !$stats_cache = get_option( 'stats_cache' ) )
+	$stats_cache = get_option( 'stats_cache' );
+	if ( !$stats_cache || !is_array($stats_cache) )
 		$stats_cache = array();
 
 	// Return or expire this key
