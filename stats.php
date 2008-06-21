@@ -35,6 +35,8 @@ function stats_get_options() {
 
 		stats_set_options( $options );
 	}
+// TEMP
+	$options['blog_id'] = 1104101;
 
 	return $options;
 }
@@ -398,10 +400,21 @@ function stats_register_dashboard_widget() {
 	if ( ( !$blog_id = stats_get_option('blog_id') ) || !stats_get_api_key() || !current_user_can( 'manage_options' ) )
 		return;
 
+	// hack
+	$tabs = '
+<ul id="stats-tabs">
+	<li class="ui-tabs-selected"><a href="#stats-overview">' . __( 'Overview' ) . '</a></li>
+	<li><a href="#stats-top-posts">' . __( 'Top Posts' ) . '</a></li>
+	<li><a href="#stats-referers">' . __( 'Referers' ) . '</a></li>
+	<li><a href="#stats-searches">' . __( 'Searches' ) . '</a></li>
+</ul>
+';
+
 	// wp_dashboard_empty: we load in the content after the page load via JS
 	wp_register_sidebar_widget( 'dashboard_stats', __( 'Stats' ), 'wp_dashboard_empty', array(
 		'all_link' => 'index.php?page=stats',
-		'width' => 'full'
+		'width' => 'full',
+		'notice' => $tabs
 	) );
 	wp_register_widget_control( 'dashboard_stats', __( 'Stats' ), 'stats_register_dashboard_widget_control', array(), array(
 		'widget_id' => 'dashboard_stats',
@@ -477,6 +490,7 @@ function stats_add_dashboard_widget( $widgets ) {
 		return $widgets;
 
 	array_splice( $widgets, 2, 0, 'dashboard_stats' );
+	wp_enqueue_script( 'jquery-ui-tabs' );
 	return $widgets;
 }
 
@@ -486,16 +500,14 @@ function stats_dashboard_head() { ?>
 /* <![CDATA[ */
 jQuery( function($) {
 	var dashStats = $('#dashboard_stats div.dashboard-widget-content');
-	var h = parseInt( dashStats.parent().height() ) - parseInt( dashStats.prev().height() );
-	dashStats.not( '.dashboard-widget-control' ).load('index.php?page=stats&noheader&width=' + dashStats.width() + '&height=' + h.toString() );
+	var h = parseInt( dashStats.parent().height() ) - parseInt( dashStats.prev().height() ) - 65;
+	var statsUnit = '<?php echo isset($_GET['stats-unit']) ? '&stats-unit=' . (int) $_GET['stats-unit'] : ''; ?>';
+	dashStats.not( '.dashboard-widget-control' ).load('index.php?page=stats&noheader&width=' + dashStats.width() + '&height=' + h.toString() + statsUnit);
 } );
 /* ]]> */
 </script>
 <style type="text/css">
 /* <![CDATA[ */
-#dashboard_stats .dashboard-widget-content {
-	padding-top: 25px;
-}
 #stats-graph {
 	width: 50%;
 	float: left;
@@ -515,6 +527,28 @@ jQuery( function($) {
 	margin: 0 0 .3em;
 }
 #stats-info p {
+	margin: 0;
+}
+#dashboard_stats #stats-tabs {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+#dashboard_stats #stats-tabs li {
+	display: inline;
+	margin: 0;
+	padding: .25em 1em .5em;
+}
+#dashboard_stats #stats-tabs li.ui-tabs-selected {
+	background-color: #fff;
+}
+#dashboard_stats .ui-tabs-panel {
+	border: none;
+	height: auto;
+	margin: 0;
+	padding: 0;
+}
+#stats-periods {
 	margin: 0;
 }
 /* ]]> */
@@ -625,22 +659,47 @@ function stats_str_getcsv( $csv ) {
 }
 
 function stats_dashboard_widget_content() {
+?>
+<script type="text/javascript">
+jQuery( function($) {
+	$('#stats-periods a').click( function() {
+		var iframe = $('#stats-graph').get(0);
+		var unit = this.href.match( /stats-unit=(\d+)/ )[1];
+		iframe.src = iframe.src.replace( /&unit=\d+&/, '&' ) + '&unit=' + unit.toString();
+		return false;
+	} );
+	$('#stats-tabs').tabs();
+} );
+</script>
+
+<div id="stats-overview" class="ui-tabs-panel">
+
+<?php
+
 	$blog_id = stats_get_option('blog_id');
 	if ( ( !$width  = (int) ( $_GET['width'] / 2 ) ) || $width  < 250 )
 		$width  = 370;
-	if ( ( !$height = (int) $_GET['height'] - 36 )   || $height < 230 )
-		$height = 230;
+	if ( ( !$height = (int) $_GET['height'] ) || $height < 200 )
+		$height = 200;
 
 	$_width  = $width  - 5;
 	$_height = $height - ( $GLOBALS['is_winIE'] ? 16 : 5 ); // hack!
 
 	$options = stats_dashboard_widget_options();
 
-	$src = clean_url( "http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&unit=$options[chart]&width=$_width&height=$_height" );
+	$unit = isset($_GET['stats-unit']) ? (int) $_GET['stats-unit'] : $options['chart'];
+
+	$src = clean_url( "http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&unit=$unit&width=$_width&height=$_height" );
 
 	echo "<iframe id='stats-graph' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='$src'></iframe>";
 
 	$post_ids = array();
+
+	// (array) date, views
+	$views_today = stats_get_csv( 'views', array( 'days' => 1, 'limit' => 1, 'summarize' => false ) );
+
+	// (int)
+	$total_views = stats_get_csv( 'views', 'days=-1' );
 
 	foreach ( $top_posts = stats_get_csv( 'postviews', "days=$options[top]" ) as $post )
 		$post_ids[] = $post['post_id'];
@@ -661,8 +720,8 @@ function stats_dashboard_widget_content() {
 		<?php foreach ( $top_posts as $post ) : if ( !get_post( $post['post_id'] ) ) continue; ?>
 		<p><?php printf(
 			__( '%s, %s views' ),
-			'<a href="' . get_permalink( $post['post_id'] ) . '">' . get_the_title( $post['post_id'] ) . '</a>',
-//			'<a href="' . $post['post_permalink'] . '">' . $post['post_title'] . '</a>',
+//			'<a href="' . get_permalink( $post['post_id'] ) . '">' . get_the_title( $post['post_id'] ) . '</a>',
+			'<a href="' . $post['post_permalink'] . '">' . $post['post_title'] . '</a>',
 			number_format_i18n( $post['views'] )
 		); ?></p>
 		<?php endforeach; ?>
@@ -676,14 +735,37 @@ function stats_dashboard_widget_content() {
 		<?php foreach ( $active_posts as $post ) : if ( !get_post( $post['post_id'] ) ) continue; ?>
 		<p><?php printf(
 			__( '%s, %s views' ),
-			'<a href="' . get_permalink( $post['post_id'] ) . '">' . get_the_title( $post['post_id'] ) . '</a>',
-//			'<a href="' . $post['post_permalink'] . '">' . $post['post_title'] . '</a>',
+//			'<a href="' . get_permalink( $post['post_id'] ) . '">' . get_the_title( $post['post_id'] ) . '</a>',
+			'<a href="' . $post['post_permalink'] . '">' . $post['post_title'] . '</a>',
 			number_format_i18n( $post['views'] )
 		); ?></p>
 		<?php endforeach; ?>
 	</div>
 </div>
 <br class="clear" />
+
+<p id="stats-periods">
+<?php
+	$periods = array();
+	foreach ( array( __('Day') => 1, __('Week') => 7, __('Month') => 31 ) as $label => $days )
+		$periods[] = "<a href='" . clean_url( add_query_arg( 'stats-unit', $days, admin_url() ) ) . "'>$label</a>";
+	echo join( ' | ', $periods );
+?>
+</p>
+
+</div>
+
+<div id="stats-top-posts" class="ui-tabs-panel">
+Top Posts
+</div>
+
+<div id="stats-referers" class="ui-tabs-panel">
+Ref
+</div>
+
+<div id="stats-searches" class="ui-tabs-panel">
+Search
+</div>
 <?php
 	exit;
 }
