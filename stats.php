@@ -35,8 +35,6 @@ function stats_get_options() {
 
 		stats_set_options( $options );
 	}
-// TEMP
-	$options['blog_id'] = 1104101;
 
 	return $options;
 }
@@ -412,7 +410,7 @@ function stats_register_dashboard_widget() {
 
 	// wp_dashboard_empty: we load in the content after the page load via JS
 	wp_register_sidebar_widget( 'dashboard_stats', __( 'Stats' ), 'wp_dashboard_empty', array(
-		'all_link' => 'index.php?page=stats',
+		'all_link' => array('index.php?page=stats', 'View All Statistics'),
 		'width' => 'full',
 		'notice' => $tabs
 	) );
@@ -508,23 +506,20 @@ jQuery( function($) {
 </script>
 <style type="text/css">
 /* <![CDATA[ */
-#stats-graph {
+#stats-graph, .stats-left {
 	width: 50%;
 	float: left;
 }
-#stats-info {
+#stats-info, .stats-right {
 	width: 49%;
 	float: left;
 }
 #stats-info div {
 	margin: 0 0 1em 30px;
 }
-#stats-info div#active {
-	margin-bottom: 0;
-}
 #stats-info h4 {
 	font-size: 1em;
-	margin: 0 0 .3em;
+	margin: 0;
 }
 #stats-info p {
 	margin: 0;
@@ -691,15 +686,16 @@ jQuery( function($) {
 
 	$src = clean_url( "http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&unit=$unit&width=$_width&height=$_height" );
 
-	echo "<iframe id='stats-graph' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='$src'></iframe>";
+	echo "<iframe id='stats-graph' class='stats-left' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='$src'></iframe>";
 
 	$post_ids = array();
 
 	// (array) date, views
-	$views_today = stats_get_csv( 'views', array( 'days' => 1, 'limit' => 1, 'summarize' => false ) );
+	$views_today = array_pop( stats_get_csv( 'views', array( 'days' => 1, 'limit' => 1, 'summarize' => false ) ) );
 
 	// (int)
-	$total_views = stats_get_csv( 'views', 'days=-1' );
+	if ( $total_views = stats_get_csv( 'views', 'days=-1' ) )
+		$total_views = (int) $total_views[0]['views'];
 
 	foreach ( $top_posts = stats_get_csv( 'postviews', "days=$options[top]" ) as $post )
 		$post_ids[] = $post['post_id'];
@@ -713,34 +709,34 @@ jQuery( function($) {
 	foreach ( $search_terms = stats_get_csv( 'searchterms', "days=$options[search]" ) as $search_term )
 		$searches[] = $search_term['searchterm'];
 
+	$comment_count = get_comment_count();
+	$post_count = wp_count_posts();
+	$page_count = wp_count_posts( 'page' );
+	$attachment_count = wp_count_posts( 'attachment' );
+
+
+	$totals = array(
+		array( __( '<a href="%s">Posts</a>: %s' ), 'edit.php?post_status=publish', $post_count->publish ),
+		array( __( '<a href="%s">Comments</a>: %s' ), 'edit-comments.php', $comment_count['total_comments'] ),
+		array( __( '<a href="%s">Tags</a>: %s' ), 'edit-tags.php', wp_count_terms( 'post_tag' ) ),
+		array( __( '<a href="%s">Categories</a>: %s' ), 'categories.php', wp_count_terms( 'category' ) ),
+		array( __( '<a href="%s">Media Uploads</a>: %s' ), 'media.php', $attachment_count->inherit ),
+		array( __( '<a href="%s">Pages</a>: %s' ), 'edit-pages.php', $page_count->publish ),
+		array( __( '<a href="%s">Drafts</a>: %s' ), 'edit.php?post_status=draft', $post_count->draft )
+	);
+		
+
 ?>
-<div id="stats-info">
-	<div id="top-posts">
-		<h4><?php _e( 'Top Posts' ); ?></h4>
-		<?php foreach ( $top_posts as $post ) : if ( !get_post( $post['post_id'] ) ) continue; ?>
-		<p><?php printf(
-			__( '%s, %s views' ),
-//			'<a href="' . get_permalink( $post['post_id'] ) . '">' . get_the_title( $post['post_id'] ) . '</a>',
-			'<a href="' . $post['post_permalink'] . '">' . $post['post_title'] . '</a>',
-			number_format_i18n( $post['views'] )
-		); ?></p>
-		<?php endforeach; ?>
-	</div>
-	<div id="top-search">
-		<h4><?php _e( 'Top Searches' ); ?></h4>
-		<p><?php echo join( ',&nbsp; ', $searches );?></p>
-	</div>
-	<div id="active">
-		<h4><?php _e( 'Most Active' ); ?></h4>
-		<?php foreach ( $active_posts as $post ) : if ( !get_post( $post['post_id'] ) ) continue; ?>
-		<p><?php printf(
-			__( '%s, %s views' ),
-//			'<a href="' . get_permalink( $post['post_id'] ) . '">' . get_the_title( $post['post_id'] ) . '</a>',
-			'<a href="' . $post['post_permalink'] . '">' . $post['post_title'] . '</a>',
-			number_format_i18n( $post['views'] )
-		); ?></p>
-		<?php endforeach; ?>
-	</div>
+<div id="stats-info" class="stats-right">
+	<h4><?php printf( __('Views Today: %s'), number_format_i18n( $views_today['views'] ) ); ?></h4>
+	<p><?php printf( __('Total Views: %s'), number_format_i18n( $total_views ) ); ?></p>
+	<p><?php printf( __('Busiest Day: %s'), '<a href="index.php?page=stats&amp;day=2008-03-12">March 12, 2008</a> (938)' ); // TODO ?></p>
+
+	<br />
+	<h4><?php _e( 'Totals' ); ?></h4>
+	<?php foreach ( $totals as $total ) : $total[2] = number_format_i18n( $total[2] ); ?>
+	<p><?php call_user_func_array( 'printf', $total ); ?></p>
+	<?php endforeach; ?>
 </div>
 <br class="clear" />
 
@@ -756,15 +752,38 @@ jQuery( function($) {
 </div>
 
 <div id="stats-top-posts" class="ui-tabs-panel">
-Top Posts
+	<div class='stats-left'>
+		<h4><?php _e( 'Top Posts' ); ?></h4>
+		<?php foreach ( $top_posts as $post ) : if ( !get_post( $post['post_id'] ) ) continue; ?>
+		<p><?php printf(
+			__( '%s, %s views' ),
+//			'<a href="' . get_permalink( $post['post_id'] ) . '">' . get_the_title( $post['post_id'] ) . '</a>',
+			'<a href="' . $post['post_permalink'] . '">' . $post['post_title'] . '</a>',
+			number_format_i18n( $post['views'] )
+		); ?></p>
+		<?php endforeach; ?>
+	</div>
+
+	<div class='stats-right'>
+		<h4><?php _e( 'Most Active' ); ?></h4>
+		<?php foreach ( $active_posts as $post ) : if ( !get_post( $post['post_id'] ) ) continue; ?>
+		<p><?php printf(
+			__( '%s, %s views' ),
+//			'<a href="' . get_permalink( $post['post_id'] ) . '">' . get_the_title( $post['post_id'] ) . '</a>',
+			'<a href="' . $post['post_permalink'] . '">' . $post['post_title'] . '</a>',
+			number_format_i18n( $post['views'] )
+		); ?></p>
+		<?php endforeach; ?>
+	</div>
 </div>
 
 <div id="stats-referers" class="ui-tabs-panel">
-Ref
+Referers
 </div>
 
 <div id="stats-searches" class="ui-tabs-panel">
-Search
+	<h4><?php _e( 'Top Searches' ); ?></h4>
+	<p><?php echo join( ',&nbsp; ', $searches );?></p>
 </div>
 <?php
 	exit;
