@@ -214,7 +214,7 @@ function stats_admin_page() {
 <?php else : ?>
 			<p><?php _e('The WordPress.com Stats Plugin is configured and working.'); ?></p>
 			<p><?php _e('Visitors who are logged in are not counted. (This means you.)'); ?></p>
-			<p><?php printf(__('Visit <a href="%s">your Dashboard</a> to see your blog stats.'), 'index.php?page=stats'); ?></p>
+			<p><?php printf(__('<a href="%s">Check out your blog stats</a>.'), 'inbox.php?page=stats'); ?></p>
 <?php endif; ?>
 
 		</div>
@@ -410,7 +410,7 @@ function stats_register_dashboard_widget() {
 
 	// wp_dashboard_empty: we load in the content after the page load via JS
 	wp_register_sidebar_widget( 'dashboard_stats', __( 'Stats' ), 'wp_dashboard_empty', array(
-		'all_link' => array('index.php?page=stats', 'View All Statistics'),
+		'all_link' => array('inbox.php?page=stats', 'View All Statistics'),
 		'width' => 'full',
 		'notice' => $tabs
 	) );
@@ -500,7 +500,7 @@ jQuery( function($) {
 	var dashStats = $('#dashboard_stats div.dashboard-widget-content');
 	var h = parseInt( dashStats.parent().height() ) - parseInt( dashStats.prev().height() ) - 65;
 	var statsUnit = '<?php echo isset($_GET['stats-unit']) ? '&stats-unit=' . (int) $_GET['stats-unit'] : ''; ?>';
-	dashStats.not( '.dashboard-widget-control' ).load('index.php?page=stats&noheader&width=' + dashStats.width() + '&height=' + h.toString() + statsUnit);
+	dashStats.not( '.dashboard-widget-control' ).load('inbox.php?page=stats&noheader&width=' + dashStats.width() + '&height=' + h.toString() + statsUnit);
 } );
 /* ]]> */
 </script>
@@ -730,7 +730,7 @@ jQuery( function($) {
 <div id="stats-info" class="stats-right">
 	<h4><?php printf( __('Views Today: %s'), number_format_i18n( $views_today['views'] ) ); ?></h4>
 	<p><?php printf( __('Total Views: %s'), number_format_i18n( $total_views ) ); ?></p>
-	<p><?php printf( __('Busiest Day: %s'), '<a href="index.php?page=stats&amp;day=2008-03-12">March 12, 2008</a> (938)' ); // TODO ?></p>
+	<p><?php printf( __('Busiest Day: %s'), '<a href="inbox.php?page=stats&amp;day=2008-03-12">March 12, 2008</a> (938)' ); // TODO ?></p>
 
 	<br />
 	<h4><?php _e( 'Totals' ); ?></h4>
