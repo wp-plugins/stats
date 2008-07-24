@@ -778,7 +778,7 @@ jQuery( function($) {
 </div>
 
 <div id="stats-referers" class="ui-tabs-panel">
-Referers
+This feature isn't enabled in this prototype.
 </div>
 
 <div id="stats-searches" class="ui-tabs-panel">
