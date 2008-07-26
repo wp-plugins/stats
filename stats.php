@@ -4,7 +4,7 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Andy Skelton
-Version: 1.3
+Version: 1.3.1
 
 Requires WordPress 2.1 or later. Not for use with WPMU.
 
@@ -808,6 +808,6 @@ add_action( 'update_option_permalink_structure', 'stats_flush_posts' );
 add_filter( 'xmlrpc_methods', 'stats_xmlrpc_methods' );
 
 define( 'STATS_VERSION', '2' );
-define( 'STATS_XMLRPC_SERVER', 'http://blogamist.wordpress.com/xmlrpc.php' );
+define( 'STATS_XMLRPC_SERVER', 'http://wordpress.com/xmlrpc.php' );
 
 ?>
