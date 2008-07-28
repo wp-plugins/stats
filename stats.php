@@ -403,7 +403,7 @@ function stats_register_dashboard_widget() {
 <ul id="stats-tabs">
 	<li class="ui-tabs-selected"><a href="#stats-overview">' . __( 'Overview' ) . '</a></li>
 	<li><a href="#stats-top-posts">' . __( 'Top Posts' ) . '</a></li>
-	<li><a href="#stats-referers">' . __( 'Referers' ) . '</a></li>
+	<li><a href="#stats-referers">' . __( 'Incoming Links' ) . '</a></li>
 	<li><a href="#stats-searches">' . __( 'Searches' ) . '</a></li>
 </ul>
 ';
