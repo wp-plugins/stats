@@ -524,6 +524,9 @@ jQuery( function($) {
 #stats-info p {
 	margin: 0;
 }
+#dashboard_stats .dashboard-widget-content {
+	padding-bottom: 0;
+}
 #dashboard_stats #stats-tabs {
 	list-style: none;
 	margin: 0;
@@ -660,7 +663,7 @@ jQuery( function($) {
 	$('#stats-periods a').click( function() {
 		var iframe = $('#stats-graph').get(0);
 		var unit = this.href.match( /stats-unit=(\d+)/ )[1];
-		iframe.src = iframe.src.replace( /&unit=\d+&/, '&' ) + '&unit=' + unit.toString();
+		iframe.src = iframe.src.replace( /\d+\.png/, unit.toString() + '.png' );
 		return false;
 	} );
 	$('#stats-tabs').tabs();
@@ -684,9 +687,11 @@ jQuery( function($) {
 
 	$unit = isset($_GET['stats-unit']) ? (int) $_GET['stats-unit'] : $options['chart'];
 
-	$src = clean_url( "http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&unit=$unit&width=$_width&height=$_height" );
+//	$src = clean_url( "http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&unit=$unit&width=$_width&height=$_height" );
+	$src = clean_url( admin_url( "images/$unit.png" ) );
 
-	echo "<iframe id='stats-graph' class='stats-left' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='$src'></iframe>";
+//	echo "<iframe id='stats-graph' class='stats-left' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='$src'></iframe>";
+	echo "<img id='stats-graph' class='stats-left' style='width: {$width}px; height: {$height}px; overflow: hidden' src='$src'></iframe>";
 
 	$post_ids = array();
 
