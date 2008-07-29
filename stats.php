@@ -259,7 +259,6 @@ function stats_admin_page() {
 			<form method="post">
 			<?php wp_nonce_field('stats'); ?>
 			<input type="hidden" name="action" value="add_or_replace" />
-			<p><?php _e('According to the WordPress.com database, this API key is already associated with at least one self-hosted blog. You can <strong>add</strong> this as a new blog on your WordPress.com account or <strong>replace</strong> an existing blog and inherit its stats history.'); ?> </p>
 			<h3><?php _e('Add new blog to my account'); ?></h3>
 			<p><?php _e('Do this if this blog is new or has never been associated with your API key. This blog will be added to your WordPress.com account.'); ?></p>
 			<p><input type="submit" name="add" value="<?php echo js_escape(__('Add to WordPress.com account')); ?>" /></p>
