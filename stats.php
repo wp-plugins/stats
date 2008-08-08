@@ -4,12 +4,15 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Andy Skelton
-Version: 1.3.2
+Version: 1.3.3
 
 Requires WordPress 2.1 or later. Not for use with WPMU.
 
 Looking for a way to hide the gif? Put this in your stylesheet:
 img#wpstats{display:none}
+
+Recent changes:
+1.3.3 - wpStats.update_postinfo no longer triggered by revision saves (post_type test)
 
 */
 
@@ -376,6 +379,9 @@ function stats_update_bloginfo() {
 }
 
 function stats_update_post( $post_id ) {
+	if ( !in_array( get_post_type($post_id), array('post', 'page', 'attachment') ) )
+		return;
+
 	stats_add_call(
 		'wpStats.update_postinfo',
 		stats_get_api_key(),
