@@ -30,9 +30,9 @@ Finally, because all of the processing and collection runs on our servers and no
 Installing should be a piece of cake and take fewer than five minutes.
 
 1. Upload `stats.php` to your `/wp-content/plugins/` directory.
-1. Activate the plugin through the 'Plugins' menu in WordPress.
-1. It will ask you to enter your WordPress.com API key, do so.
-1. Sit back and wait a few minutes for your stats to come rolling in.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
+3. It will ask you to enter your WordPress.com API key, do so.
+4. Sit back and wait a few minutes for your stats to come rolling in.
 
 == Frequently Asked Questions ==
 
