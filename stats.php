@@ -4,7 +4,7 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Andy Skelton
-Version: 1.4
+Version: 1.5a
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
 Requires WordPress 2.1 or later. Not for use with WPMU.
@@ -13,6 +13,7 @@ Looking for a way to hide the gif? Put this in your stylesheet:
 img#wpstats{display:none}
 
 Recent changes:
+1.5   - Kill iframes. Use blog's role/cap system to allow local users to view reports.
 1.4   - Added gmt_offset setting to blog definition.
 1.3.8 - Fixed "Missing API Key" error appearing in place of more helpful errors. Hat tip: Walt Ritscher.
 1.3.7 - If blog dashboard is https, stats iframe should be https.
@@ -129,7 +130,7 @@ function stats_array($kvs) {
 
 function stats_admin_menu() {
 	if ( stats_get_option('blog_id') ) {
-		$hook = add_submenu_page('index.php', __('Blog Stats'), __('Blog Stats'), 'manage_options', 'stats', 'stats_reports_page');
+		$hook = add_submenu_page('index.php', __('Blog Stats'), __('Blog Stats'), 'publish_posts', 'stats', 'stats_reports_page');
 		add_action("load-$hook", 'stats_reports_load');
 	}
 	$hook = add_submenu_page('plugins.php', __('WordPress.com Stats Plugin'), __('WordPress.com Stats'), 'manage_options', 'wpstats', 'stats_admin_page');
@@ -155,8 +156,40 @@ function stats_reports_page() {
 	if ( isset( $_GET['noheader'] ) )
 		return stats_dashboard_widget_content();
 	$blog_id = stats_get_option('blog_id');
+	$key = stats_get_api_key();
 	$day = isset( $_GET['day'] ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $_GET['day'] ) ? "&day=$_GET[day]" : '';
-	echo "<iframe id='statsreport' frameborder='0' src='http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true$day'></iframe>";
+	$http = ( !empty( $_SERVER['HTTPS'] ) ) ? 'https' : 'http';
+	$q = array();
+	$args = array(
+		'view' => array('referrers', 'postviews', 'searchterms', 'clicks', 'table'),
+		'numdays' => 'int',
+		'day' => 'date',
+		'unit' => array(1, 7, 31),
+		'summarize' => null
+	);
+	foreach ( $args as $var => $vals ) {
+		if ( ! isset($_GET[$var]) )
+			continue;
+		if ( is_array($vals) ) {
+			if ( in_array($_GET[$var], $vals) )
+				$q[$var] = $_GET[$var];
+		} elseif ( $vals == 'int' ) {
+			$q[$var] = intval($_GET[$var]);
+		} elseif ( $vals == 'date' ) {
+			if ( preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET[$var]) )
+				$q[$var] = $_GET[$var];
+		} elseif ( $vals == null ) {
+			$q[$var] = '';
+		}
+	}
+	$url = add_query_arg($q, "$http://blogamist.wordpress.com/wp-admin/index.php?page=stats&blog=$blog_id&key=$key&proxy&noheader=true$day");
+
+	$get = wp_remote_get($url, array('timeout'=>300));
+	if ( is_wp_error($get) || empty($get['body']) ) {
+		echo "<iframe id='statsreport' frameborder='0' src='http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true$day'></iframe>";
+	} else {
+		echo $get['body'];
+	}
 }
 
 function stats_admin_load() {
