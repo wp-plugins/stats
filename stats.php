@@ -7,7 +7,7 @@ Author: Andy Skelton
 Version: 1.5a
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-Requires WordPress 2.1 or later. Not for use with WPMU.
+Requires WordPress 2.7 or later. Not for use with WPMU.
 
 Looking for a way to hide the gif? Put this in your stylesheet:
 img#wpstats{display:none}
