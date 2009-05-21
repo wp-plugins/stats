@@ -4,7 +4,7 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Andy Skelton
-Version: 1.5a
+Version: 1.5a2
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
 Requires WordPress 2.7 or later. Not for use with WPMU.
@@ -153,19 +153,30 @@ function stats_reports_head() {
 }
 
 function stats_reports_page() {
-	if ( isset( $_GET['noheader'] ) )
+	if ( isset( $_GET['dashboard'] ) )
 		return stats_dashboard_widget_content();
 	$blog_id = stats_get_option('blog_id');
 	$key = stats_get_api_key();
-	$day = isset( $_GET['day'] ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $_GET['day'] ) ? "&day=$_GET[day]" : '';
+	$day = isset( $_GET['day'] ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $_GET['day'] ) ? $_GET['day'] : false;
 	$http = ( !empty( $_SERVER['HTTPS'] ) ) ? 'https' : 'http';
-	$q = array();
+	$q = array(
+		'noheader' => 'true',
+		'proxy' => '',
+		'page' => 'stats',
+		'key' => $key,
+		'day' => $day,
+		'blog' => $blog_id,
+	);
 	$args = array(
 		'view' => array('referrers', 'postviews', 'searchterms', 'clicks', 'table'),
 		'numdays' => 'int',
 		'day' => 'date',
 		'unit' => array(1, 7, 31),
-		'summarize' => null
+		'summarize' => null,
+		'post' => 'int',
+		'width' => 'int',
+		'height' => 'int',
+		'data' => 'data',
 	);
 	foreach ( $args as $var => $vals ) {
 		if ( ! isset($_GET[$var]) )
@@ -180,16 +191,31 @@ function stats_reports_page() {
 				$q[$var] = $_GET[$var];
 		} elseif ( $vals == null ) {
 			$q[$var] = '';
+		} elseif ( $vals == 'data' ) {
+			if ( substr($_GET[$var], 0, 9) == 'index.php' )
+				$q[$var] = $_GET[$var];
 		}
 	}
-	$url = add_query_arg($q, "$http://blogamist.wordpress.com/wp-admin/index.php?page=stats&blog=$blog_id&key=$key&proxy&noheader=true$day");
+	if ( isset( $_GET['swf'] ) ) {
+		$url = "$http://blogamist.wordpress.com/wp-includes/charts/ofc/open-flash-chart.swf";
+	} elseif ( isset( $_GET['chart'] ) ) {
+		if ( $_GET['chart'] == 'stats-data' )
+			$url = "$http://blogamist.wordpress.com/wp-includes/charts/stats-data.php";
+	} else {
+		$url = "$http://blogamist.wordpress.com/wp-admin/index.php";
+	}
+
+	$url = add_query_arg($q, $url);
 
 	$get = wp_remote_get($url, array('timeout'=>300));
+
 	if ( is_wp_error($get) || empty($get['body']) ) {
 		echo "<iframe id='statsreport' frameborder='0' src='http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true$day'></iframe>";
 	} else {
 		echo $get['body'];
 	}
+	if ( isset( $_GET['noheader'] ) )
+		die;
 }
 
 function stats_admin_load() {
@@ -646,7 +672,7 @@ jQuery( function($) {
 		var args = 'width=' + ( dashStats.prev().width() * 2 ).toString();
 	}
 
-	dashStats.not( '.dashboard-widget-control' ).load('index.php?page=stats&noheader&' + args );
+	dashStats.not( '.dashboard-widget-control' ).load('index.php?page=stats&noheader&dashboard&' + args );
 } );
 /* ]]> */
 </script>
