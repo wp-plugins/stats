@@ -4,7 +4,7 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Andy Skelton
-Version: 1.5a2
+Version: 1.5a3
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
 Requires WordPress 2.7 or later. Not for use with WPMU.
@@ -158,7 +158,6 @@ function stats_reports_page() {
 	$blog_id = stats_get_option('blog_id');
 	$key = stats_get_api_key();
 	$day = isset( $_GET['day'] ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $_GET['day'] ) ? $_GET['day'] : false;
-	$http = ( !empty( $_SERVER['HTTPS'] ) ) ? 'https' : 'http';
 	$q = array(
 		'noheader' => 'true',
 		'proxy' => '',
@@ -168,7 +167,7 @@ function stats_reports_page() {
 		'blog' => $blog_id,
 	);
 	$args = array(
-		'view' => array('referrers', 'postviews', 'searchterms', 'clicks', 'table'),
+		'view' => array('referrers', 'postviews', 'searchterms', 'clicks', 'post', 'table'),
 		'numdays' => 'int',
 		'day' => 'date',
 		'unit' => array(1, 7, 31),
@@ -197,12 +196,12 @@ function stats_reports_page() {
 		}
 	}
 	if ( isset( $_GET['swf'] ) ) {
-		$url = "$http://blogamist.wordpress.com/wp-includes/charts/ofc/open-flash-chart.swf";
+		$url = "https://s-ssl.wordpress.com/wp-includes/charts/ofc/open-flash-chart.swf";
 	} elseif ( isset( $_GET['chart'] ) ) {
-		if ( $_GET['chart'] == 'stats-data' )
-			$url = "$http://blogamist.wordpress.com/wp-includes/charts/stats-data.php";
+		if ( preg_match('/^[a-z0-9-]+$/', $_GET['chart']) )
+			$url = "https://blogamist.wordpress.com/wp-includes/charts/{$_GET['chart']}.php";
 	} else {
-		$url = "$http://blogamist.wordpress.com/wp-admin/index.php";
+		$url = "https://blogamist.wordpress.com/wp-admin/index.php";
 	}
 
 	$url = add_query_arg($q, $url);
@@ -853,11 +852,30 @@ function stats_dashboard_widget_content() {
 
 	$options = stats_dashboard_widget_options();
 
-	$http = ( !empty( $_SERVER['HTTPS'] ) ) ? 'https' : 'http';
+	$q = array(
+		'noheader' => 'true',
+		'proxy' => '',
+		'page' => 'stats',
+		'blog' => $blog_id,
+		'key' => stats_get_api_key(),
+		'chart' => '',
+		'unit' => $options['chart'],
+		'width' => $_width,
+		'height' => $_height,
+	);
 
-	$src = clean_url( "$http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&unit=$options[chart]&width=$_width&height=$_height" );
+	$url = 'https://blogamist.wordpress.com/wp-admin/index.php';
 
-	echo "<iframe id='stats-graph' class='stats-section' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='$src'></iframe>";
+	$url = add_query_arg($q, $url);
+
+	$get = wp_remote_get($url, array('timeout'=>300));
+
+	$src = clean_url( "https://blogamist.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&unit=$options[chart]&width=$_width&height=$_height" );
+
+	if ( is_wp_error($get) || empty($get['body']) )
+		echo "<iframe id='stats-graph' class='stats-section' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='$src'></iframe>";
+	else
+		echo $get['body'];
 
 	$post_ids = array();
 
