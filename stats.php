@@ -4,7 +4,7 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Andy Skelton
-Version: 1.5b2
+Version: 1.5
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
 Requires WordPress 2.7 or later. Not for use with WPMU.
@@ -13,7 +13,7 @@ Looking for a way to hide the gif? Put this in your stylesheet:
 img#wpstats{display:none}
 
 Recent changes:
-1.5   - Kill iframes. Use blog's role/cap system to allow local users to view reports.
+1.5   - Kill iframes. Use blog's role/cap system to allow local users to view reports. Thanks to Stefanos Kofopoulos for helping to debug encoding issues.
 1.4   - Added gmt_offset setting to blog definition.
 1.3.8 - Fixed "Missing API Key" error appearing in place of more helpful errors. Hat tip: Walt Ritscher.
 1.3.7 - If blog dashboard is https, stats iframe should be https.
