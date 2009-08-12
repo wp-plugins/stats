@@ -4,23 +4,13 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Andy Skelton
-Version: 1.5
+Version: 1.5.1
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
 Requires WordPress 2.7 or later. Not for use with WPMU.
 
 Looking for a way to hide the gif? Put this in your stylesheet:
 img#wpstats{display:none}
-
-Recent changes:
-1.5   - Kill iframes. Use blog's role/cap system to allow local users to view reports. Thanks to Stefanos Kofopoulos for helping to debug encoding issues.
-1.4   - Added gmt_offset setting to blog definition.
-1.3.8 - Fixed "Missing API Key" error appearing in place of more helpful errors. Hat tip: Walt Ritscher.
-1.3.7 - If blog dashboard is https, stats iframe should be https.
-1.3.6 - fopen v wp_remote_fopen CSV fix from A. Piccinelli
-1.3.5 - Compatibility with WordPress 2.7
-1.3.4 - Compatibility with WordPress 2.7
-1.3.3 - wpStats.update_postinfo no longer triggered by revision saves (post_type test)
 
 */
 
@@ -196,9 +186,8 @@ function stats_reports_page() {
 				$q[$var] = $_GET[$var];
 		}
 	}
-	if ( isset( $_GET['swf'] ) ) {
-		$url = "https://s-ssl.wordpress.com/wp-includes/charts/ofc/open-flash-chart.swf";
-	} elseif ( isset( $_GET['chart'] ) ) {
+
+	if ( isset( $_GET['chart'] ) ) {
 		if ( preg_match('/^[a-z0-9-]+$/', $_GET['chart']) )
 			$url = "https://dashboard.wordpress.com/wp-includes/charts/{$_GET['chart']}.php";
 	} else {
@@ -214,10 +203,18 @@ function stats_reports_page() {
 		$day = $day ? "&amp;day=$day" : '';
 		echo "<iframe id='statsreport' frameborder='0' src='$http://dashboard.wordpress.com/wp-admin/index.php?page=estats&amp;blog=$blog_id&amp;noheader=true$day'></iframe>";
 	} else {
-		echo convert_post_titles($get['body']);
+		$body = convert_post_titles($get['body']);
+		$body = convert_swf_urls($body);
+		echo $body;
 	}
 	if ( isset( $_GET['noheader'] ) )
 		die;
+}
+
+function convert_swf_urls($html) {
+	$swf_url = plugin_dir_url(__FILE__) . 'open-flash-chart.swf?data=';
+	$html = preg_replace('!(<param name="movie" value="|<embed src=")(.+?)&data=!', "$1$swf_url", $html);
+	return $html;
 }
 
 function convert_post_titles($html) {
@@ -420,7 +417,7 @@ function stats_get_posts( $args ) {
 
 function stats_get_blog( ) {
 	$home = parse_url( get_option('home') );
-	return array(
+	$blog = array(
 		'host' => $home['host'],
 		'path' => $home['path'],
 		'name' => get_option('blogname'),
@@ -429,18 +426,20 @@ function stats_get_blog( ) {
 		'gmt_offset' => get_option('gmt_offset'),
 		'version' => STATS_VERSION
 	);
+	return array_map('wp_specialchars', $blog);
 }
 
 function stats_get_post( $post_id ) {
 	$post = get_post( $post_id );
 	if ( empty( $post ) )
 		$post = get_page( $post_id );
-	return array(
+	$_post = array(
 		'id' => $post->ID,
 		'permalink' => get_permalink($post->ID),
 		'title' => $post->post_title,
 		'type' => $post->post_type
 	);
+	return array_map('wp_specialchars', $_post);
 }
 
 function stats_client() {

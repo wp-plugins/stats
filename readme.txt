@@ -65,3 +65,38 @@ The plugin collects stats via a javascript call, so as long as the JS call is on
 = Can I use the same API key on multiple blogs? =
 
 Just like with Akismet, you're welcome to use the same API key on multiple blogs. In fact our interface is optimized for quickly switching between stats for multiple blogs.
+
+== Changes ==
+
+= 1.5.1 =
+* Include <a href="http://teethgrinder.co.uk/open-flash-chart/">Open Flash Chart</a> SWF. Faster and more reliable than proxying it. Should fix missing graph for many users.
+* Move change log out of source code.
+* Fixed an XMLRPC encoding issue that resulted in "malformed" error when entering API key. Thanks to Oscar Reixa for helping.
+
+= 1.5 =
+* Kill iframes.
+* Use blog's role/cap system to allow local users to view reports. (No more switcher.)
+* Thanks to Stefanos Kofopoulos for helping to debug encoding issues.
+
+= 1.4 =
+* Added gmt_offset setting to blog definition. (Stats in your time zone.)
+
+= 1.3.8 =
+* Fixed "Missing API Key" error appearing in place of more helpful errors. Hat tip: Walt Ritscher.
+
+= 1.3.7 =
+* If blog dashboard is https, stats iframe should be https.
+
+= 1.3.6 =
+* fopen v wp_remote_fopen CSV fix from A. Piccinelli
+
+= 1.3.5 =
+* Compatibility with WordPress 2.7
+
+= 1.3.4 =
+* Compatibility with WordPress 2.7
+
+= 1.3.3 =
+* wpStats.update_postinfo no longer triggered by revision saves (post_type test)
+
+
