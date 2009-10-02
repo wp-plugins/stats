@@ -3,7 +3,7 @@ Contributors: skeltoac, mdawaffe
 Tags: stats, statistics
 Requires at least: 2.7
 Tested up to: 2.8.4
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 
 You can have simple, concise stats with no additional load on your server by plugging into WordPress.com's stat system.
 
@@ -67,6 +67,9 @@ The plugin collects stats via a javascript call, so as long as the JS call is on
 Just like with Akismet, you're welcome to use the same API key on multiple blogs. In fact our interface is optimized for quickly switching between stats for multiple blogs.
 
 == Changes ==
+
+= 1.5.2 =
+* Fix dashboard chart missing due to omitted line of code.
 
 = 1.5.1 =
 * Include <a href="http://teethgrinder.co.uk/open-flash-chart/">Open Flash Chart</a> SWF. Faster and more reliable than proxying it. Should fix missing graph for many users.
