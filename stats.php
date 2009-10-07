@@ -120,7 +120,7 @@ function stats_array($kvs) {
 
 function stats_admin_menu() {
 	if ( stats_get_option('blog_id') ) {
-		$hook = add_submenu_page('index.php', __('Blog Stats'), __('Blog Stats'), 'publish_posts', 'stats', 'stats_reports_page');
+		$hook = add_submenu_page('index.php', __('Site Stats'), __('Site Stats'), 'publish_posts', 'stats', 'stats_reports_page');
 		add_action("load-$hook", 'stats_reports_load');
 	}
 	$hook = add_submenu_page('plugins.php', __('WordPress.com Stats Plugin'), __('WordPress.com Stats'), 'manage_options', 'wpstats', 'stats_admin_page');
@@ -389,7 +389,7 @@ function stats_admin_page() {
 <?php else : ?>
 			<p><?php _e('The WordPress.com Stats Plugin is configured and working.'); ?></p>
 			<p><?php _e('Visitors who are logged in are not counted. (This means you.)'); ?></p>
-			<p><?php printf(__('Visit <a href="%s">your Dashboard</a> to see your blog stats. If you are asked to log in, use your WordPress.com username and password.'), 'index.php?page=stats'); ?></p>
+			<p><?php printf(__('Visit <a href="%s">your Dashboard</a> to see your site stats. If you are asked to log in, use your WordPress.com username and password.'), 'index.php?page=stats'); ?></p>
 <?php endif; ?>
 
 		</div>
@@ -513,8 +513,8 @@ function stats_activity() {
 
 	if ( $options['blog_id'] ) {
 		?>
-		<h3><?php _e('WordPress.com Blog Stats'); ?></h3>
-		<p><?php printf(__('Visit %s to see your blog stats.'), '<a href="http://dashboard.wordpress.com/wp-admin/index.php?page=stats&blog=' . $options['blog_id'] . '">' . __('your Global Dashboard') . '</a>'); ?></p>
+		<h3><?php _e('WordPress.com Site Stats'); ?></h3>
+		<p><?php printf(__('Visit %s to see your site stats.'), '<a href="http://dashboard.wordpress.com/wp-admin/index.php?page=stats&blog=' . $options['blog_id'] . '">' . __('your Global Dashboard') . '</a>'); ?></p>
 		<?php
 	}
 }
