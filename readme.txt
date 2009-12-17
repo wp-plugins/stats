@@ -2,8 +2,8 @@
 Contributors: skeltoac, mdawaffe, automattic
 Tags: stats, statistics
 Requires at least: 2.7
-Tested up to: 2.8.4
-Stable tag: 1.5.4
+Tested up to: 2.9-RC1
+Stable tag: 1.6
 
 You can have simple, concise stats with no additional load on your server by plugging into WordPress.com's stat system.
 
@@ -68,7 +68,10 @@ Just like with Akismet, you're welcome to use the same API key on multiple blogs
 
 == Changes ==
 
-= 1.5.3 =
+= 1.6 =
+* Add shortlink generator. Now wp.me shortlinks are available on the Edit Post screen from a button next to View Post.
+
+= 1.5.4 =
 * Work around core API change in plugins_url. Different code for 2.7. Fixes missing charts in 2.7.*. No changes for 2.8+.
 
 = 1.5.3 =

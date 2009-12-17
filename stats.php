@@ -4,7 +4,7 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Andy Skelton
-Version: 1.5.4
+Version: 1.6
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
 Requires WordPress 2.7 or later. Not for use with WPMU.
@@ -980,6 +980,89 @@ function stats_dashboard_widget_content() {
 if ( !function_exists('number_format_i18n') ) {
 	function number_format_i18n( $number, $decimals = null ) { return number_format( $number, $decimals ); }
 }
+
+if ( !function_exists('dec2sixtwo') ) {
+	function dec2sixtwo( $num ) {
+		$index = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		$out = "";
+
+		for ( $t = floor( log10( $num ) / log10( 62 ) ); $t >= 0; $t-- ) {
+			$a = floor( $num / pow( 62, $t ) );
+			$out = $out . substr( $index, $a, 1 );
+			$num = $num - ( $a * pow( 62, $t ) );
+		}
+
+		return $out;
+	}
+}
+
+if ( ! function_exists('get_shortlink') ) :
+function get_shortlink( $post_id, $force_numeric = false ) {
+	$blog_id = stats_get_option('blog_id');
+
+	// Return link to blog home if no post id
+	if ( empty($post_id) )
+		return 'http://wp.me/' . dec2sixtwo($blog_id);
+
+	$post = get_post($post_id);
+	$type = '';
+
+	if ( !$force_numeric && 'publish' == $post->post_status && 'post' == $post->post_type && strlen($post->post_name) <= 8 && false === strpos($post->post_name, '%')
+		&& false === strpos($post->post_name, '-') ) {
+		$id = $post->post_name;
+		$type = 's';
+	} else {
+		$id = dec2sixtwo($post_id);
+		if ( 'page' == $post->post_type )
+			$type = 'P';
+		elseif ( 'post' == $post->post_type )
+			$type = 'p';
+		elseif ( 'attachment' == $post->post_type )
+			$type = 'a';
+	}
+
+	if ( empty($type) )
+		return '';
+
+	return 'http://wp.me/' . $type . dec2sixtwo($blog_id) . '-' . $id;
+}
+
+function shortlink_wp_head() {
+	global $wp_query;
+
+	if ( ! ( is_singular() || is_front_page() ) )
+		return;
+
+	$shortlink = get_shortlink($wp_query->get_queried_object_id());
+	echo '<link rel="shortlink" href="' . $shortlink . '" />';
+}
+
+function shortlink_header() {
+	global $wp_query;
+
+	if ( headers_sent() )
+		return;
+
+	if ( ! ( is_singular() || is_front_page() ) )
+		return;
+
+	$shortlink = get_shortlink($wp_query->get_queried_object_id());
+
+	header('Link: <' . $shortlink . '>; rel=shortlink');
+}
+
+add_action('wp_head', 'shortlink_wp_head');
+add_action('wp', 'shortlink_header');
+
+function get_shortlink_html($html, $post_id) {
+	$url = get_shortlink($post_id);
+	$html .= '<input id="shortlink" type="hidden" value="' . $url . '" /><a href="#" class="button" onclick="prompt(&#39;URL:&#39;, jQuery(\'#shortlink\').val()); return false;">' . __('Get Shortlink') . '</a>';
+	return $html;
+}
+
+add_filter( 'get_sample_permalink_html', 'get_shortlink_html', 10, 2 );
+
+endif;
 
 add_action( 'wp_dashboard_setup', 'stats_register_dashboard_widget' );
 add_filter( 'wp_dashboard_widgets', 'stats_add_dashboard_widget' );
