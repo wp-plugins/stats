@@ -3,7 +3,7 @@ Contributors: skeltoac, mdawaffe, automattic
 Tags: stats, statistics
 Requires at least: 2.7
 Tested up to: 2.9
-Stable tag: 1.6
+Stable tag: 1.6.1
 
 You can have simple, concise stats with no additional load on your server by plugging into WordPress.com's stat system.
 
@@ -67,6 +67,10 @@ The plugin collects stats via a javascript call, so as long as the JS call is on
 Just like with Akismet, you're welcome to use the same API key on multiple blogs. In fact our interface is optimized for quickly switching between stats for multiple blogs.
 
 == Changes ==
+
+= 1.6.1 =
+* Fix attachment titles in post stats list.
+* Fix chart not appearing due to .htaccess directive installed by some users. Thanks to Sean at growingmoneyblog.com for access to his affected system.
 
 = 1.6 =
 * Add shortlink generator. Now wp.me shortlinks are available on the Edit Post screen from a button next to View Post.

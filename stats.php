@@ -4,7 +4,7 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Andy Skelton
-Version: 1.6
+Version: 1.6.1
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
 Requires WordPress 2.7 or later. Not for use with WPMU.
@@ -245,7 +245,7 @@ function convert_post_title($matches) {
 	$post_id = $matches[1];
 	if ( isset($stats_posts[$post_id]) )
 		return '<a href="'.get_permalink($post_id).'" target="_blank">'.get_the_title($post_id).'</a>';
-	return sprintf(__("Post #%d"), $post_id);
+	return $matches[0];
 }
 
 function stats_admin_load() {
