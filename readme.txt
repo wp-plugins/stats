@@ -114,5 +114,3 @@ Just like with Akismet, you're welcome to use the same API key on multiple blogs
 
 = 1.3.3 =
 * wpStats.update_postinfo no longer triggered by revision saves (post_type test)
-
-
