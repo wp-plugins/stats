@@ -68,6 +68,9 @@ Just like with Akismet, you're welcome to use the same API key on multiple blogs
 
 == Changes ==
 
+= Trunk =
+* Fix infinite loop when shortlink function dec2sixtwo called with a negative number. Thanks to Andrew Mattie for identifying this bug.
+
 = 1.6.1 =
 * Fix attachment titles in post stats list.
 * Fix chart not appearing due to .htaccess directive installed by some users. Thanks to Sean at growingmoneyblog.com for access to his affected system.

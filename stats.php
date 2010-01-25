@@ -986,6 +986,11 @@ if ( !function_exists('dec2sixtwo') ) {
 		$index = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 		$out = "";
 
+		if ( $num < 0 ) {
+			$out = '-';
+			$num = abs($num);
+		}
+
 		for ( $t = floor( log10( $num ) / log10( 62 ) ); $t >= 0; $t-- ) {
 			$a = floor( $num / pow( 62, $t ) );
 			$out = $out . substr( $index, $a, 1 );
