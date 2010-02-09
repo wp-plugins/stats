@@ -27,12 +27,13 @@ Finally, because all of the processing and collection runs on our servers and no
 
 == Installation ==
 
-Installing should be a piece of cake and take fewer than five minutes.
+The automatic plugin installer should work for most people. Manual installation is easy and takes fewer than five minutes.
 
-1. Upload `stats.php` to your `/wp-content/plugins/` directory.
-2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. It will ask you to enter your WordPress.com API key, do so.
-4. Sit back and wait a few minutes for your stats to come rolling in.
+1. Create a `stats` directory in your `plugins` directory. Typically that's `wp-content/plugins/stats/`.
+2. Into this new directory upload `stats.php` and `open-flash-chart.swf`.
+3. Activate the plugin through the 'Plugins' menu in WordPress.
+4. It will ask you to enter your WordPress.com API key, do so.
+5. Sit back and wait a few minutes for your stats to come rolling in.
 
 == Frequently Asked Questions ==
 
