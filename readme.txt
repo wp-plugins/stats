@@ -2,8 +2,8 @@
 Contributors: skeltoac, mdawaffe, automattic
 Tags: stats, statistics
 Requires at least: 2.7
-Tested up to: 2.9
-Stable tag: 1.6.1
+Tested up to: 2.9.2
+Stable tag: 1.6.2
 
 You can have simple, concise stats with no additional load on your server by plugging into WordPress.com's stat system.
 
@@ -69,8 +69,9 @@ Just like with Akismet, you're welcome to use the same API key on multiple blogs
 
 == Changes ==
 
-= Trunk =
+= 1.6.2 =
 * Fix infinite loop when shortlink function dec2sixtwo called with a negative number. Thanks to Andrew Mattie for identifying this bug.
+* Fix unescaped Top Searches section in dashboard module. Thanks to Kobi for the report.
 
 = 1.6.1 =
 * Fix attachment titles in post stats list.
