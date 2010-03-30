@@ -617,24 +617,39 @@ function stats_register_dashboard_widget() {
 }
 
 function stats_dashboard_widget_options() {
-	$defaults = array( 'chart' => 1, 'top' => 7, 'search' => 7, 'active' => 7 );
+	$defaults = array( 'chart' => 1, 'top' => 1, 'search' => 7, 'active' => 7 );
 	if ( ( !$options = get_option( 'stats_dashboard_widget' ) ) || !is_array($options) )
 		$options = array();
+
+	// Ignore obsolete option values
+	$intervals = array(1, 7, 31, 90, 365);
+	foreach ( array('top', 'search', 'active') as $key )
+		if ( isset($options[$key]) && !in_array($options[$key], $intervals) )
+			unset($options[$key]);
+
 	return array_merge( $defaults, $options );
 }
 
 function stats_register_dashboard_widget_control() {
 	$periods   = array( '1' => __('day'), '7' => __('week'), '31' => __('month') );
-	$intervals = array( '-1' => __('all time'), '1' => __('the past day'), '7' => __('the past week'), '31' => __('the past month'), '90' => __('the past quarter'), '365' => __('the past year') );
+	$intervals = array( '1' => __('the past day'), '7' => __('the past week'), '31' => __('the past month'), '90' => __('the past quarter'), '365' => __('the past year') );
 	$options = stats_dashboard_widget_options();
 
+	$defaults = array(
+		'top' => 1,
+		'search' => 7,
+		'active' => 7,
+	);
 
 	if ( 'post' == strtolower($_SERVER['REQUEST_METHOD']) && isset( $_POST['widget_id'] ) && 'dashboard_stats' == $_POST['widget_id'] ) {
 		if ( isset($periods[$_POST['chart']]) )
 			$options['chart'] = $_POST['chart'];
-		foreach ( array( 'top', 'search', 'active' ) as $key )
+		foreach ( array( 'top', 'search', 'active' ) as $key ) {
 			if ( isset($intervals[$_POST[$key]]) )
 				$options[$key] = $_POST[$key];
+			else
+				$options[$key] = $defaults[$key];
+		}
 		update_option( 'stats_dashboard_widget', $options );
 	}
 ?>
