@@ -996,8 +996,8 @@ if ( !function_exists('number_format_i18n') ) {
 	function number_format_i18n( $number, $decimals = null ) { return number_format( $number, $decimals ); }
 }
 
-if ( !function_exists('dec2sixtwo') ) {
-	function dec2sixtwo( $num ) {
+if ( !function_exists('wpme_dec2sixtwo') ) {
+	function wpme_dec2sixtwo( $num ) {
 		$index = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 		$out = "";
 
@@ -1016,23 +1016,43 @@ if ( !function_exists('dec2sixtwo') ) {
 	}
 }
 
-if ( ! function_exists('get_shortlink') ) :
-function get_shortlink( $post_id, $force_numeric = false ) {
+if ( ! function_exists('wpme_get_shortlink') ) :
+function wpme_get_shortlink( $id = 0, $context = 'post', $allow_slugs = true ) {
+	global $wp_query;
+
 	$blog_id = stats_get_option('blog_id');
 
-	// Return link to blog home if no post id
-	if ( empty($post_id) )
-		return 'http://wp.me/' . dec2sixtwo($blog_id);
+	if ( 'query' == $context ) {
+		if ( is_singular() ) {
+			$id = $wp_query->get_queried_object_id();
+			$context = 'post';
+		} elseif ( is_front_page() ) {
+			$context = 'blog';
+		} else {
+			return '';
+		}
+	}
 
-	$post = get_post($post_id);
+	if ( 'blog' == $context ) {
+		if ( empty($id) )
+			$id = $blog_id;
+		return 'http://wp.me/' . wpme_dec2sixtwo($id);
+	}
+
+	$post = get_post($id);
+
+	if ( empty($post) )
+			return '';
+
+	$post_id = $post->ID;
 	$type = '';
 
-	if ( !$force_numeric && 'publish' == $post->post_status && 'post' == $post->post_type && strlen($post->post_name) <= 8 && false === strpos($post->post_name, '%')
+	if ( $allow_slugs && 'publish' == $post->post_status && 'post' == $post->post_type && strlen($post->post_name) <= 8 && false === strpos($post->post_name, '%')
 		&& false === strpos($post->post_name, '-') ) {
 		$id = $post->post_name;
 		$type = 's';
 	} else {
-		$id = dec2sixtwo($post_id);
+		$id = wpme_dec2sixtwo($post_id);
 		if ( 'page' == $post->post_type )
 			$type = 'P';
 		elseif ( 'post' == $post->post_type )
@@ -1044,43 +1064,46 @@ function get_shortlink( $post_id, $force_numeric = false ) {
 	if ( empty($type) )
 		return '';
 
-	return 'http://wp.me/' . $type . dec2sixtwo($blog_id) . '-' . $id;
+	return 'http://wp.me/' . $type . wpme_dec2sixtwo($blog_id) . '-' . $id;
 }
 
-function shortlink_wp_head() {
+function wpme_shortlink_wp_head() {
 	global $wp_query;
 
-	if ( ! ( is_singular() || is_front_page() ) )
-		return;
-
-	$shortlink = get_shortlink($wp_query->get_queried_object_id());
+	$shortlink = wpme_get_shortlink(0, 'query');
 	echo '<link rel="shortlink" href="' . $shortlink . '" />';
 }
 
-function shortlink_header() {
+function wpme_shortlink_header() {
 	global $wp_query;
 
 	if ( headers_sent() )
 		return;
 
-	if ( ! ( is_singular() || is_front_page() ) )
-		return;
-
-	$shortlink = get_shortlink($wp_query->get_queried_object_id());
+	$shortlink = wpme_get_shortlink(0, 'query');
 
 	header('Link: <' . $shortlink . '>; rel=shortlink');
 }
 
-add_action('wp_head', 'shortlink_wp_head');
-add_action('wp', 'shortlink_header');
-
-function get_shortlink_html($html, $post_id) {
-	$url = get_shortlink($post_id);
+function wpme_get_shortlink_html($html, $post_id) {
+	$url = wpme_get_shortlink($post_id);
 	$html .= '<input id="shortlink" type="hidden" value="' . $url . '" /><a href="#" class="button" onclick="prompt(&#39;URL:&#39;, jQuery(\'#shortlink\').val()); return false;">' . __('Get Shortlink') . '</a>';
 	return $html;
 }
 
-add_filter( 'get_sample_permalink_html', 'get_shortlink_html', 10, 2 );
+function wpme_get_shortlink_handler($shortlink, $id, $context, $allow_slugs) {
+	return wpme_get_shortlink($id, $context, $allow_slugs);
+}
+
+if ( ! function_exists('wp_get_shortlink') ) {
+	// Register these only for WP < 3.0.
+	add_action('wp_head', 'wpme_shortlink_wp_head');
+	add_action('wp', 'wpme_shortlink_header');
+	add_filter( 'get_sample_permalink_html', 'wpme_get_shortlink_html', 10, 2 );
+} else {
+	// Register a shortlink handler for WP >= 3.0.
+	add_filter('get_shortlink', 'wpme_get_shortlink_handler', 10, 4);
+}
 
 endif;
 
