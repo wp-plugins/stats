@@ -65,7 +65,20 @@ The plugin collects stats via a javascript call, so as long as the JS call is on
 
 = Can I use the same API key on multiple blogs? =
 
-Just like with Akismet, you're welcome to use the same API key on multiple blogs. In fact our interface is optimized for quickly switching between stats for multiple blogs.
+Just like with Akismet, you're welcome to use the same API key on multiple blogs. If you view your stats directly on WordPress.com, you can easily switch between all of your blogs' stats reports.
+
+= How do I add a Top Posts widget to my blog? =
+
+We opened our database for developers to retrieve stats. The API is at `http://stats.wordpress.com/csv.php` and the plugin includes a handy function, `stats_get_csv()`, which you can use to get your most popular posts. Here is code you can add to your theme based on the work of <a href="http://www.binarymoon.co.uk/2010/03/ultimate-add-popular-posts-wordpress-blog-1-line-code/">Ben Gillbanks</a>:
+
+`<?php if ( function_exists('stats_get_csv') && $top_posts = stats_get_csv('postviews', 'days=7&limit=8') ) : ?>
+	<h3>Currently Hot</h3>
+	<ol>
+<?php foreach ( $top_posts as $p ) : ?>
+		<li><a href="<?php echo $p['post_permalink']; ?>"><?php echo $p['post_title']; ?></a></li>
+<?php endforeach; ?>
+	</ol>
+<?php endif; ?>`
 
 == Changes ==
 
