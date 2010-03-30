@@ -3,7 +3,7 @@ Contributors: skeltoac, mdawaffe, automattic
 Tags: stats, statistics
 Requires at least: 2.7
 Tested up to: 2.9.2
-Stable tag: 1.6.2
+Stable tag: 1.6.3
 
 You can have simple, concise stats with no additional load on your server by plugging into WordPress.com's stat system.
 
@@ -81,6 +81,12 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 <?php endif; ?>`
 
 == Changes ==
+
+= 1.6.3 =
+* Add support for shortlink API in WordPress 3.0
+* Add CSV usage example to readme
+* Remove .htaccess
+* Remove all-time stats from dashboard widget
 
 = 1.6.2 =
 * Fix infinite loop when shortlink function dec2sixtwo called with a negative number. Thanks to Andrew Mattie for identifying this bug.
