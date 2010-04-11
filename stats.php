@@ -199,7 +199,7 @@ function stats_reports_page() {
 	$get = wp_remote_get($url, array('timeout'=>300));
 
 	if ( is_wp_error($get) || empty($get['body']) ) {
-		$http = $_SERVER['https'] ? 'https' : 'http';
+		$http = $_SERVER['HTTPS'] ? 'https' : 'http';
 		$day = $day ? "&amp;day=$day" : '';
 		echo "<iframe id='statsreport' frameborder='0' src='$http://dashboard.wordpress.com/wp-admin/index.php?page=estats&amp;blog=$blog_id&amp;noheader=true$day'></iframe>";
 	} else {
@@ -919,7 +919,7 @@ function stats_dashboard_widget_content() {
 	$get = wp_remote_get($url, array('timeout'=>300));
 
 	if ( is_wp_error($get) || empty($get['body']) ) {
-		$http = $_SERVER['https'] ? 'https' : 'http';
+		$http = $_SERVER['HTTPS'] ? 'https' : 'http';
 		$src = clean_url( "$http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&unit=$options[chart]&width=$_width&height=$_height" );
 		echo "<iframe id='stats-graph' class='stats-section' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='$src'></iframe>";
 	} else {
