@@ -99,8 +99,9 @@ function stats_footer() {
 	else
 		$a['post'] = '0';
 
+	$http = $_SERVER['HTTPS'] ? 'https' : 'http';
 ?>
-<script src="http://stats.wordpress.com/e-<?php echo gmdate('YW'); ?>.js" type="text/javascript"></script>
+<script src="<?php echo $http; ?>://stats.wordpress.com/e-<?php echo gmdate('YW'); ?>.js" type="text/javascript"></script>
 <script type="text/javascript">
 st_go({<?php echo stats_array($a); ?>});
 var load_cmc = function(){linktracker_init(<?php echo "{$a['blog']},{$a['post']},2"; ?>);};
