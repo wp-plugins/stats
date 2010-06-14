@@ -14,13 +14,7 @@ img#wpstats{display:none}
 
 */
 
-// You can hardcode a WP.com API key here.
-$stats_wpcom_api_key = '';
-
 function stats_get_api_key() {
-	if ( !empty( $GLOBALS['stats_wpcom_api_key'] ) )
-		return $GLOBALS['stats_wpcom_api_key'];
-
 	return stats_get_option('api_key');
 }
 
@@ -330,9 +324,6 @@ function stats_admin_page() {
 <?php if ( empty($options['blog_id']) && !empty($options['key_check']) ) : ?>
 			<p><?php printf(__('The API key "%1$s" belongs to the WordPress.com account of "%2$s". If this is not your account, please re-enter your API key.'), $options['key_check'][0], $options['key_check'][1]); ?></p>
 
-<?php	if ( !empty( $GLOBALS['stats_wpcom_api_key'] ) ) : ?>
-			<p><?php _e('Your API key is hard-coded in the plugin file. Please edit the plugin and then reload this page.'); ?></p>
-<?php	else : ?>
 			<p>
 			<form method="post">
 			<?php wp_nonce_field('stats'); ?>
@@ -340,7 +331,6 @@ function stats_admin_page() {
 			<input type="submit" value="<?php echo js_escape(__('Re-enter API key')); ?>" />
 			</form>
 			</p>
-<?php	endif; ?>
 
 <?php	if ( !empty($options['key_check'][2]) ) : ?>
 			<form method="post">
@@ -375,7 +365,6 @@ function stats_admin_page() {
 <?php elseif ( empty( $options['blog_id'] ) ) : ?>
 			<p><?php _e('The WordPress.com Stats Plugin is not working because it needs to be linked to a WordPress.com account.'); ?></p>
 
-<?php	if ( empty( $GLOBALS['stats_wpcom_api_key'] ) ) : ?>
 			<form action="plugins.php?page=<?php echo $plugin_page; ?>" method="post">
 				<?php wp_nonce_field('stats'); ?>
 				<p><?php _e('Enter your WordPress.com API key to link this blog to your WordPress.com account. Be sure to use your own API key! Using any other key will lock you out of your stats. (<a href="http://wordpress.com/profile/">Get your key here.</a>)'); ?></p>
@@ -383,10 +372,6 @@ function stats_admin_page() {
 				<input type="hidden" name="action" value="enter_key" />
 				<p class="submit"><input type="submit" value="<?php _e('Save &raquo;'); ?>" /></p>
 			</form>
-<?php	else : ?>
-			<p><?php _e('An API Key is present in the source code but it did not work.') ?></p>
-<?php	endif; ?>
-
 <?php else : ?>
 			<p><?php _e('The WordPress.com Stats Plugin is configured and working.'); ?></p>
 			<p><?php _e('Visitors who are logged in are not counted. (This means you.)'); ?></p>
