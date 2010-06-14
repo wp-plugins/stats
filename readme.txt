@@ -80,7 +80,10 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 	</ol>
 <?php endif; ?>`
 
-== Changes ==
+== Changelog ==
+
+= 1.7 =
+* Remove support for hard-coded API key as $stats_wpcom_api_key
 
 = 1.6.3 =
 * Add support for shortlink API in WordPress 3.0
