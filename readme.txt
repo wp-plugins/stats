@@ -2,8 +2,8 @@
 Contributors: skeltoac, mdawaffe, automattic
 Tags: stats, statistics
 Requires at least: 2.7
-Tested up to: 2.9.2
-Stable tag: 1.6.3
+Tested up to: 3.0
+Stable tag: 1.7
 
 You can have simple, concise stats with no additional load on your server by plugging into WordPress.com's stat system.
 
