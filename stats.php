@@ -89,6 +89,8 @@ function stats_footer() {
 
 	$options = stats_get_options();
 
+	echo "<!--stats_footer_test-->";
+
 	if ( !$options['footer'] )
 		stats_set_option('footer', true);
 
@@ -362,6 +364,10 @@ function stats_notice_footer() {
 		return;
 	if ( function_exists('is_plugin_active_for_network') && is_plugin_active_for_network(plugin_basename(__FILE__)) )
 		return;
+	if ( strpos(wp_remote_get(get_bloginfo('siteurl')), 'stats_footer_test') ) {
+		stats_set_option('footer', true);
+		return;
+	}
 	echo "<div class='updated' style='background-color:#f66;'><p>" . __('WordPress.com Stats is unable to work properly because your theme seems to lack the necessary footer code. Usually this can be fixed by adding the following code just before &lt;/body&gt; in footer.php:') . "</p><p><code>&lt;?php wp_footer(); ?&gt;</code></p></div>";
 }
 
