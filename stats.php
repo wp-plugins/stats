@@ -57,6 +57,7 @@ function stats_upgrade_options( $options ) {
 		'host'         => '',
 		'path'         => '',
 		'blog_id'      => false,
+		'wp_me'        => true,
 	);
 
 	if ( is_array( $options ) && !empty( $options ) )
@@ -207,6 +208,7 @@ function stats_reports_page() {
 }
 
 function convert_swf_urls($html) {
+	global $wp_version;
 	if ( version_compare($wp_version, '2.8', '<') ) {
 		$path = dirname(plugin_basename(__FILE__));
 		if ( $path == '.' )
@@ -269,7 +271,10 @@ function stats_admin_load() {
 					if ( empty( $path ) )
 						$path = '/';
 					$options = stats_get_options();
-					$options['blog_id'] = intval($_POST['blog_id']);
+					if ( isset($_POST['recover']) )
+						$options['blog_id'] = intval($_POST['recoverblog']);
+					else
+						$options['blog_id'] = intval($_POST['blog_id']);
 					$options['api_key'] = $key_check[0];
 					$options['host'] = $host;
 					$options['path'] = $path;
@@ -278,6 +283,14 @@ function stats_admin_load() {
 				}
 				if ( stats_get_option('blog_id') )
 					stats_set_option('key_check', false);
+				wp_redirect( "plugins.php?page=$plugin_page" );
+				exit;
+
+			case 'save_options' :
+				$options = stats_get_options();
+				$options['wp_me'] = isset($_POST['wp_me']) && $_POST['wp_me'];
+				stats_set_options($options);
+
 				wp_redirect( "plugins.php?page=$plugin_page" );
 				exit;
 		}
@@ -289,7 +302,7 @@ function stats_admin_load() {
 }
 
 function stats_admin_notices() {
-	if ( stats_get_api_key() )
+	if ( stats_get_api_key() || isset($_GET['page']) && $_GET['page'] == 'wpstats' )
 		return;
 	echo "<div class='updated' style='background-color:#f66;'><p>" . sprintf(__('<a href="%s">WordPress.com Stats</a> needs attention: please enter an API key or disable the plugin.'), "plugins.php?page=wpstats") . "</p></div>";
 }
@@ -322,43 +335,53 @@ function stats_admin_page() {
 <?php $options['error'] = false; stats_set_options($options); endif; ?>
 
 <?php if ( empty($options['blog_id']) && !empty($options['key_check']) ) : ?>
-			<p><?php printf(__('The API key "%1$s" belongs to the WordPress.com account of "%2$s". If this is not your account, please re-enter your API key.'), $options['key_check'][0], $options['key_check'][1]); ?></p>
-
-			<p>
-			<form method="post">
-			<?php wp_nonce_field('stats'); ?>
-			<input type="hidden" name="action" value="reset" />
-			<input type="submit" value="<?php echo js_escape(__('Re-enter API key')); ?>" />
-			</form>
-			</p>
+			<p><?php printf(__('The API key "%1$s" belongs to the WordPress.com account "%2$s". If you want to use a different account, please <a href="%3$s">enter the correct API key</a>.'), $options['key_check'][0], $options['key_check'][1], wp_nonce_url('?page=wpstats&action=reset', 'stats')); ?></p>
+			<p><?php _e('Note: the API key you use determines who will be registered as the "owner" of this blog in the WordPress.com database. Please choose your key accordingly. Do not use a temporary key.'); ?></p>
 
 <?php	if ( !empty($options['key_check'][2]) ) : ?>
 			<form method="post">
 			<?php wp_nonce_field('stats'); ?>
 			<input type="hidden" name="action" value="add_or_replace" />
-			<p><?php _e('According to the WordPress.com database, this API key is already associated with at least one self-hosted blog. You can <strong>add</strong> this as a new blog on your WordPress.com account or <strong>replace</strong> an existing blog and inherit its stats history.'); ?> </p>
-			<h3><?php _e('Add new blog to my account'); ?></h3>
-			<p><?php _e('Do this if this blog is new or has never been associated with your API key. This blog will be added to your WordPress.com account.'); ?></p>
-			<p><input type="submit" name="add" value="<?php echo js_escape(__('Add to WordPress.com account')); ?>" /></p>
-			<h3><?php _e('Replace an existing blog'); ?></h3>
-			<p><?php _e('Do this if you want this blog to take over the stats history of another blog associated with your WordPress.com account. This is appropriate if you have reinstalled WordPress, changed hosts, or restored your blog from an export file.'); ?></p>
+<?php
+		$domainpath = preg_replace('|.*://|', '', get_bloginfo('siteurl'));
+		foreach ( $options['key_check'][2] as $blog ) {
+			if ( trailingslashit("{$blog[domain]}{$blog[path]}") == trailingslashit($domainpath) )
+				break;
+			else
+				unset($blog);
+		}
+?>
+
+			<h3><?php _e('Recommended Action'); ?></h3>
+<?php		if ( isset($blog) ) : ?>
+			<input type='hidden' name='recoverblog' value='<?php echo $blog['userblog_id']; ?>' />
+			<p><?php _e('It looks like you have installed Stats on a blog with this URL before. You can recover the stats history from that blog here.'); ?></p>
+			<p><input type="submit" name="recover" value="<?php echo js_escape(__('Recover stats')); ?>" /></p>
+<?php		else : ?>
+			<p><?php _e('It looks like this blog has never had stats before. There is no record of its URL in the WordPress.com database.'); ?></p>
+			<p><input type="submit" name="add" value="<?php echo js_escape(__('Add this blog to my WordPress.com account')); ?>" /></p>
+<?php		endif; ?>
+
+			<h3><?php _e('Recover other stats'); ?></h3>
+			<p><?php _e("Have you relocated this blog from a different URL? You may opt to have this blog take over the stats history from any other self-hosted blog associated with your WordPress.com account. This is appropriate if this blog had a different URL in the past. The WordPress.com database will rename its records to match this blog's URL.", 'stats'); ?></p>
 			<p>
 			<select name="blog_id">
-				<option selected="selected" value="0"><?php _e('Select a blog to replace'); ?></option>
+				<option selected="selected" value="0"><?php _e('Select a blog'); ?></option>
 <?php		foreach ( $options['key_check'][2] as $blog ) : ?>
-				<option value="<?php echo $blog['userblog_id']; ?>"><?php echo $blog['siteurl']; ?></option>
+				<option value="<?php echo $blog['userblog_id']; ?>"><?php echo $blog['domain'] . $blog['path']; ?></option>
 <?php		endforeach; ?>
 			</select>
-			<input type="submit" name="replace" value="<?php echo js_escape(__('Replace')); ?>" />
+			<input type="submit" name="replace" value="<?php echo js_escape(__('Take over stats history')); ?>" />
 			</p>
 			</form>
+
 <?php	else : ?>
 			<form method="post">
 			<?php wp_nonce_field('stats'); ?>
 			<input type="hidden" name="action" value="add_or_replace" />
-			<h3><?php _e('Add new blog to my account'); ?></h3>
-			<p><?php _e('Do this if this blog is new or has never been associated with your API key. This blog will be added to your WordPress.com account.'); ?></p>
-			<p><input type="submit" name="add" value="<?php echo js_escape(__('Add to WordPress.com account')); ?>" /></p>
+			<h3><?php _e('Add blog to WordPress.com account'); ?></h3>
+			<p><?php _e("This blog will be added to your WordPress.com account. You will be able to allow other WordPress.com users to see your stats if you like."); ?></p>
+			<p><input type="submit" name="add" value="<?php echo js_escape(__('Add blog to WordPress.com')); ?>" /></p>
 			</form>
 <?php	endif; ?>
 
@@ -375,7 +398,15 @@ function stats_admin_page() {
 <?php else : ?>
 			<p><?php _e('The WordPress.com Stats Plugin is configured and working.'); ?></p>
 			<p><?php _e('Visitors who are logged in are not counted. (This means you.)'); ?></p>
-			<p><?php printf(__('Visit <a href="%s">your Dashboard</a> to see your site stats. If you are asked to log in, use your WordPress.com username and password.'), 'index.php?page=stats'); ?></p>
+			<p><?php printf(__('Visit <a href="%s">your Dashboard</a> to see your site stats.'), 'index.php?page=stats'); ?></p>
+			<p><?php printf(__('You can also see your stats, plus grant access for others to see them, on <a href="https://dashboard.wordpress.com/wp-admin/index.php?page=stats&blog=%s">your WordPress.com dashboard</a>.'), $options['blog_id']); ?></p>
+			<h3><?php _e('Options'); ?></h3>
+			<form action="plugins.php?page=<?php echo $plugin_page; ?>" method="post">
+			<?php wp_nonce_field('stats'); ?>
+			<input type='hidden' name='action' value='save_options' />
+			<p><input type='checkbox' <?php checked($options['wp_me']); ?> name='wp_me' /> <?php _e("Use WP.me for <a href='http://wp.me/sf2B5-shorten'>shortlinks</a>. This is a free service from WordPress.com."); ?></p>
+			<p class="submit"><input type='submit' value='<?php echo esc_attr(__('Save options')); ?>' /></p>
+			</form>
 <?php endif; ?>
 
 		</div>
@@ -1081,14 +1112,16 @@ function wpme_get_shortlink_handler($shortlink, $id, $context, $allow_slugs) {
 	return wpme_get_shortlink($id, $context, $allow_slugs);
 }
 
-if ( ! function_exists('wp_get_shortlink') ) {
-	// Register these only for WP < 3.0.
-	add_action('wp_head', 'wpme_shortlink_wp_head');
-	add_action('wp', 'wpme_shortlink_header');
-	add_filter( 'get_sample_permalink_html', 'wpme_get_shortlink_html', 10, 2 );
-} else {
-	// Register a shortlink handler for WP >= 3.0.
-	add_filter('get_shortlink', 'wpme_get_shortlink_handler', 10, 4);
+if ( stats_get_option('wp_me') ) {
+	if ( ! function_exists('wp_get_shortlink') ) {
+		// Register these only for WP < 3.0.
+		add_action('wp_head', 'wpme_shortlink_wp_head');
+		add_action('wp', 'wpme_shortlink_header');
+		add_filter( 'get_sample_permalink_html', 'wpme_get_shortlink_html', 10, 2 );
+	} else {
+		// Register a shortlink handler for WP >= 3.0.
+		add_filter('get_shortlink', 'wpme_get_shortlink_handler', 10, 4);
+	}
 }
 
 endif;
@@ -1124,5 +1157,5 @@ add_action( 'update_option_permalink_structure', 'stats_flush_posts' );
 // Teach the XMLRPC server how to dance properly
 add_filter( 'xmlrpc_methods', 'stats_xmlrpc_methods' );
 
-define( 'STATS_VERSION', '3' );
+define( 'STATS_VERSION', '4' );
 define( 'STATS_XMLRPC_SERVER', 'http://wordpress.com/xmlrpc.php' );

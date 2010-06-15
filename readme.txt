@@ -84,6 +84,8 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 
 = 1.7 =
 * Remove support for hard-coded API key as $stats_wpcom_api_key
+* Update admin screen after API key entry to add Recommended Action and clarify instructions
+* Add option to disable wp.me shortlinks
 
 = 1.6.3 =
 * Add support for shortlink API in WordPress 3.0
