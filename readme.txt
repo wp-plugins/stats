@@ -86,6 +86,7 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 * Remove support for hard-coded API key as $stats_wpcom_api_key
 * Update admin screen after API key entry to add Recommended Action and clarify instructions
 * Add option to disable wp.me shortlinks
+* Add option to select roles with stats report visibility
 * When activated for entire network, do not show admin notice about missing API keys
 * When plugins.php disabled, move stats admin page to options-general.php
 

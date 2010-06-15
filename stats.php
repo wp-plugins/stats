@@ -58,6 +58,7 @@ function stats_upgrade_options( $options ) {
 		'path'         => '',
 		'blog_id'      => false,
 		'wp_me'        => true,
+		'roles'        => array('administrator','editor','author'),
 	);
 
 	if ( is_array( $options ) && !empty( $options ) )
@@ -115,8 +116,17 @@ function stats_array($kvs) {
 }
 
 function stats_admin_menu() {
+	global $current_user;
+	$roles = stats_get_option('roles');
+	$cap = 'administrator';
+	foreach ( $roles as $role ) {
+		if ( current_user_can($role) ) {
+			$cap = $role;
+			break;
+		}
+	}
 	if ( stats_get_option('blog_id') ) {
-		$hook = add_submenu_page('index.php', __('Site Stats'), __('Site Stats'), 'publish_posts', 'stats', 'stats_reports_page');
+		$hook = add_submenu_page('index.php', __('Site Stats'), __('Site Stats'), $role, 'stats', 'stats_reports_page');
 		add_action("load-$hook", 'stats_reports_load');
 	}
 	$parent = stats_admin_parent();
@@ -305,8 +315,13 @@ function stats_admin_load() {
 			case 'save_options' :
 				$options = stats_get_options();
 				$options['wp_me'] = isset($_POST['wp_me']) && $_POST['wp_me'];
-				stats_set_options($options);
 
+				$options['roles'] = array('administrator');
+				foreach ( get_editable_roles() as $role => $details )
+					if ( isset($_POST["role_$role"]) && $_POST["role_$role"] )
+						$options['roles'][] = $role;
+
+				stats_set_options($options);
 				wp_redirect( stats_admin_path() );
 				exit;
 		}
@@ -419,10 +434,22 @@ function stats_admin_page() {
 			<p><?php printf(__('You can also see your stats, plus grant access for others to see them, on <a href="https://dashboard.wordpress.com/wp-admin/index.php?page=stats&blog=%s">your WordPress.com dashboard</a>.'), $options['blog_id']); ?></p>
 			<h3><?php _e('Options'); ?></h3>
 			<form action="<?php echo stats_admin_path() ?>" method="post">
-			<?php wp_nonce_field('stats'); ?>
 			<input type='hidden' name='action' value='save_options' />
-			<p><input type='checkbox' <?php checked($options['wp_me']); ?> name='wp_me' /> <?php _e("Use WP.me for <a href='http://wp.me/sf2B5-shorten'>shortlinks</a>. This is a free service from WordPress.com."); ?></p>
-			<p class="submit"><input type='submit' value='<?php echo esc_attr(__('Save options')); ?>' /></p>
+			<?php wp_nonce_field('stats'); ?>
+			<table id="menu" class="form-table">
+			<tr valign="top"><th scope="row"><label for="wp_me"><?php _e( 'Shortlinks' ); ?></label></th>
+			<td><label><input type='checkbox' <?php checked($options['wp_me']); ?> name='wp_me' id='wp_me' /> <?php _e("Publish WP.me <a href='http://wp.me/sf2B5-shorten'>shortlinks</a> as metadata. This is a free service from WordPress.com."); ?></label></td>
+			</tr>
+			<tr valign="top"><th scope="row"><?php _e( 'Report visibility' ); ?></th>
+			<td>
+				<?php _e('Select the roles that will be able to view stats reports.'); ?><br/>
+<?php	$stats_roles = stats_get_option('roles');
+	foreach ( get_editable_roles() as $role => $details ) : ?>
+				<label><input type='checkbox' <?php if ( $role == 'administrator' ) echo "disabled='disabled' "; ?>name='role_<?php echo $role; ?>'<?php checked($role == 'administrator' || in_array($role, $stats_roles)); ?> /> <?php echo translate_user_role($details['name']); ?></label><br/>
+<?php	endforeach; ?>
+			</tr>
+			</table>
+			<p class="submit"><input type='submit' class='button-primary' value='<?php echo esc_attr(__('Save options')); ?>' /></p>
 			</form>
 <?php endif; ?>
 
