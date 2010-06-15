@@ -87,8 +87,10 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 * Update admin screen after API key entry to add Recommended Action and clarify instructions
 * Add option to disable wp.me shortlinks
 * Add option to select roles with stats report visibility
+* Add option to enable tracking logged-in users
 * When activated for entire network, do not show admin notice about missing API keys
 * When plugins.php disabled, move stats admin page to options-general.php
+* Add check for footer code and display a helpful notice if not detected
 
 = 1.6.3 =
 * Add support for shortlink API in WordPress 3.0

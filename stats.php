@@ -14,6 +14,8 @@ img#wpstats{display:none}
 
 */
 
+define( 'STATS_VERSION', '5' );
+
 function stats_get_api_key() {
 	return stats_get_option('api_key');
 }
@@ -59,6 +61,8 @@ function stats_upgrade_options( $options ) {
 		'blog_id'      => false,
 		'wp_me'        => true,
 		'roles'        => array('administrator','editor','author'),
+		'reg_users'    => false,
+		'footer'       => false,
 	);
 
 	if ( is_array( $options ) && !empty( $options ) )
@@ -85,7 +89,13 @@ function stats_footer() {
 
 	$options = stats_get_options();
 
-	if ( !empty($current_user->ID) || empty($options['blog_id']) )
+	if ( !$options['footer'] )
+		stats_set_option('footer', true);
+
+	if ( empty($options['blog_id']) )
+		return;
+
+	if ( !$options['reg_users'] && !empty($current_user->ID) )
 		return;
 
 	$a['blog'] = $options['blog_id'];
@@ -137,7 +147,7 @@ function stats_admin_menu() {
 }
 
 function stats_admin_parent() {
-	if ( function_exists('get_site_option') ) {
+	if ( function_exists('is_multisite') && is_multisite() ) {
 		$menus = get_site_option( 'menu_items' );
 		if ( isset($menus['plugins']) && $menus['plugins'] )
 			return 'plugins.php';
@@ -315,6 +325,7 @@ function stats_admin_load() {
 			case 'save_options' :
 				$options = stats_get_options();
 				$options['wp_me'] = isset($_POST['wp_me']) && $_POST['wp_me'];
+				$options['reg_users'] = isset($_POST['reg_users']) && $_POST['reg_users'];
 
 				$options['roles'] = array('administrator');
 				foreach ( get_editable_roles() as $role => $details )
@@ -333,12 +344,25 @@ function stats_admin_load() {
 }
 
 function stats_admin_notices() {
+	stats_notice_blog_id();
+	stats_notice_footer();
+}
+
+function stats_notice_blog_id() {
 	if ( stats_get_api_key() || isset($_GET['page']) && $_GET['page'] == 'wpstats' )
 		return;
 	// Skip the notice if plugin activated network-wide.
 	if ( function_exists('is_plugin_active_for_network') && is_plugin_active_for_network(plugin_basename(__FILE__)) )
 		return;
 	echo "<div class='updated' style='background-color:#f66;'><p>" . sprintf(__('<a href="%s">WordPress.com Stats</a> needs attention: please enter an API key or disable the plugin.'), stats_admin_path()) . "</p></div>";
+}
+
+function stats_notice_footer() {
+	if ( !stats_get_api_key() || stats_get_option('footer') )
+		return;
+	if ( function_exists('is_plugin_active_for_network') && is_plugin_active_for_network(plugin_basename(__FILE__)) )
+		return;
+	echo "<div class='updated' style='background-color:#f66;'><p>" . __('WordPress.com Stats is unable to work properly because your theme seems to lack the necessary footer code. Usually this can be fixed by adding the following code just before &lt;/body&gt; in footer.php:') . "</p><p><code>&lt;?php wp_footer(); ?&gt;</code></p></div>";
 }
 
 function stats_admin_head() {
@@ -428,8 +452,6 @@ function stats_admin_page() {
 				<p class="submit"><input type="submit" value="<?php _e('Save &raquo;'); ?>" /></p>
 			</form>
 <?php else : ?>
-			<p><?php _e('The WordPress.com Stats Plugin is configured and working.'); ?></p>
-			<p><?php _e('Visitors who are logged in are not counted. (This means you.)'); ?></p>
 			<p><?php printf(__('Visit <a href="%s">your Dashboard</a> to see your site stats.'), 'index.php?page=stats'); ?></p>
 			<p><?php printf(__('You can also see your stats, plus grant access for others to see them, on <a href="https://dashboard.wordpress.com/wp-admin/index.php?page=stats&blog=%s">your WordPress.com dashboard</a>.'), $options['blog_id']); ?></p>
 			<h3><?php _e('Options'); ?></h3>
@@ -437,8 +459,10 @@ function stats_admin_page() {
 			<input type='hidden' name='action' value='save_options' />
 			<?php wp_nonce_field('stats'); ?>
 			<table id="menu" class="form-table">
+			<tr valign="top"><th scope="row"><label for="wp_me"><?php _e( 'Registered users' ); ?></label></th>
+			<td><label><input type='checkbox'<?php checked($options['reg_users']); ?> name='reg_users' id='reg_users' /> <?php _e("Count the page views of registered users who are logged in."); ?></label></td>
 			<tr valign="top"><th scope="row"><label for="wp_me"><?php _e( 'Shortlinks' ); ?></label></th>
-			<td><label><input type='checkbox' <?php checked($options['wp_me']); ?> name='wp_me' id='wp_me' /> <?php _e("Publish WP.me <a href='http://wp.me/sf2B5-shorten'>shortlinks</a> as metadata. This is a free service from WordPress.com."); ?></label></td>
+			<td><label><input type='checkbox'<?php checked($options['wp_me']); ?> name='wp_me' id='wp_me' /> <?php _e("Publish WP.me <a href='http://wp.me/sf2B5-shorten'>shortlinks</a> as metadata. This is a free service from WordPress.com."); ?></label></td>
 			</tr>
 			<tr valign="top"><th scope="row"><?php _e( 'Report visibility' ); ?></th>
 			<td>
@@ -649,10 +673,8 @@ function stats_get_blog_id($api_key) {
 }
 
 function stats_activate() {
-	$options = stats_get_options();
-
-	if ( empty($options['blog_id']) && $api_key = stats_get_api_key() )
-		stats_get_blog_id($api_key);
+	// Trigger footer test
+	wp_remote_get(get_bloginfo('siteurl'));
 }
 
 function stats_deactivate() {
@@ -1201,5 +1223,4 @@ add_action( 'update_option_permalink_structure', 'stats_flush_posts' );
 // Teach the XMLRPC server how to dance properly
 add_filter( 'xmlrpc_methods', 'stats_xmlrpc_methods' );
 
-define( 'STATS_VERSION', '4' );
 define( 'STATS_XMLRPC_SERVER', 'http://wordpress.com/xmlrpc.php' );
