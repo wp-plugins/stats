@@ -119,10 +119,28 @@ function stats_admin_menu() {
 		$hook = add_submenu_page('index.php', __('Site Stats'), __('Site Stats'), 'publish_posts', 'stats', 'stats_reports_page');
 		add_action("load-$hook", 'stats_reports_load');
 	}
-	$hook = add_submenu_page('plugins.php', __('WordPress.com Stats Plugin'), __('WordPress.com Stats'), 'manage_options', 'wpstats', 'stats_admin_page');
+	$parent = stats_admin_parent();
+	$hook = add_submenu_page($parent, __('WordPress.com Stats Plugin'), __('WordPress.com Stats'), 'manage_options', 'wpstats', 'stats_admin_page');
 	add_action("load-$hook", 'stats_admin_load');
 	add_action("admin_head-$hook", 'stats_admin_head');
 	add_action('admin_notices', 'stats_admin_notices');
+}
+
+function stats_admin_parent() {
+	if ( function_exists('get_site_option') ) {
+		$menus = get_site_option( 'menu_items' );
+		if ( isset($menus['plugins']) && $menus['plugins'] )
+			return 'plugins.php';
+		else
+			return 'options-general.php';
+	} else {
+		return 'plugins.php';
+	}
+}
+
+function stats_admin_path() {
+	$parent = stats_admin_parent();
+	return "$parent?page=wpstats";
 }
 
 function stats_reports_load() {
@@ -246,18 +264,16 @@ function convert_post_title($matches) {
 }
 
 function stats_admin_load() {
-	global $plugin_page;
-
 	if ( ! empty( $_POST['action'] ) && $_POST['_wpnonce'] == wp_create_nonce('stats') ) {
 		switch( $_POST['action'] ) {
 			case 'reset' :
 				stats_set_options(array());
-				wp_redirect( "plugins.php?page=$plugin_page" );
+				wp_redirect( stats_admin_path() );
 				exit;
 
 			case 'enter_key' :
 				stats_check_key( $_POST['api_key'] );
-				wp_redirect( "plugins.php?page=$plugin_page" );
+				wp_redirect( stats_admin_path() );
 				exit;
 
 			case 'add_or_replace' :
@@ -283,7 +299,7 @@ function stats_admin_load() {
 				}
 				if ( stats_get_option('blog_id') )
 					stats_set_option('key_check', false);
-				wp_redirect( "plugins.php?page=$plugin_page" );
+				wp_redirect( stats_admin_path() );
 				exit;
 
 			case 'save_options' :
@@ -291,7 +307,7 @@ function stats_admin_load() {
 				$options['wp_me'] = isset($_POST['wp_me']) && $_POST['wp_me'];
 				stats_set_options($options);
 
-				wp_redirect( "plugins.php?page=$plugin_page" );
+				wp_redirect( stats_admin_path() );
 				exit;
 		}
 	}
@@ -304,7 +320,10 @@ function stats_admin_load() {
 function stats_admin_notices() {
 	if ( stats_get_api_key() || isset($_GET['page']) && $_GET['page'] == 'wpstats' )
 		return;
-	echo "<div class='updated' style='background-color:#f66;'><p>" . sprintf(__('<a href="%s">WordPress.com Stats</a> needs attention: please enter an API key or disable the plugin.'), "plugins.php?page=wpstats") . "</p></div>";
+	// Skip the notice if plugin activated network-wide.
+	if ( function_exists('is_plugin_active_for_network') && is_plugin_active_for_network(plugin_basename(__FILE__)) )
+		return;
+	echo "<div class='updated' style='background-color:#f66;'><p>" . sprintf(__('<a href="%s">WordPress.com Stats</a> needs attention: please enter an API key or disable the plugin.'), stats_admin_path()) . "</p></div>";
 }
 
 function stats_admin_head() {
@@ -320,8 +339,6 @@ function stats_admin_head() {
 }
 
 function stats_admin_page() {
-	global $plugin_page;
-
 	$options = stats_get_options();
 	?>
 	<div class="wrap">
@@ -388,7 +405,7 @@ function stats_admin_page() {
 <?php elseif ( empty( $options['blog_id'] ) ) : ?>
 			<p><?php _e('The WordPress.com Stats Plugin is not working because it needs to be linked to a WordPress.com account.'); ?></p>
 
-			<form action="plugins.php?page=<?php echo $plugin_page; ?>" method="post">
+			<form action="<?php echo stats_admin_path() ?>" method="post">
 				<?php wp_nonce_field('stats'); ?>
 				<p><?php _e('Enter your WordPress.com API key to link this blog to your WordPress.com account. Be sure to use your own API key! Using any other key will lock you out of your stats. (<a href="http://wordpress.com/profile/">Get your key here.</a>)'); ?></p>
 				<label for="api_key"><?php _e('API Key:'); ?> <input type="text" name="api_key" id="api_key" value="<?php echo $api_key; ?>" /></label>
@@ -401,7 +418,7 @@ function stats_admin_page() {
 			<p><?php printf(__('Visit <a href="%s">your Dashboard</a> to see your site stats.'), 'index.php?page=stats'); ?></p>
 			<p><?php printf(__('You can also see your stats, plus grant access for others to see them, on <a href="https://dashboard.wordpress.com/wp-admin/index.php?page=stats&blog=%s">your WordPress.com dashboard</a>.'), $options['blog_id']); ?></p>
 			<h3><?php _e('Options'); ?></h3>
-			<form action="plugins.php?page=<?php echo $plugin_page; ?>" method="post">
+			<form action="<?php echo stats_admin_path() ?>" method="post">
 			<?php wp_nonce_field('stats'); ?>
 			<input type='hidden' name='action' value='save_options' />
 			<p><input type='checkbox' <?php checked($options['wp_me']); ?> name='wp_me' /> <?php _e("Use WP.me for <a href='http://wp.me/sf2B5-shorten'>shortlinks</a>. This is a free service from WordPress.com."); ?></p>
