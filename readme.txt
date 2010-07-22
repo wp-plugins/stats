@@ -82,6 +82,10 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 
 == Changelog ==
 
+= trunk =
+* Add domain to gettext calls
+* Remove delete_option from deactivation hook
+
 = 1.7.2 =
 * Remove footer test pending investigation of errors.
 
