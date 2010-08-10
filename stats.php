@@ -443,7 +443,7 @@ function stats_admin_page() {
 			<input type="hidden" name="action" value="add_or_replace" />
 			<h3><?php _e('Add blog to WordPress.com account', 'stats'); ?></h3>
 			<p><?php _e("This blog will be added to your WordPress.com account. You will be able to allow other WordPress.com users to see your stats if you like.", 'stats'); ?></p>
-			<p><input type="submit" name="add" value="<?php echo js_escape(__('Add blog to WordPress.com', 'stats')); ?>" /></p>
+			<p><input type="submit" name="add" value="<?php echo esc_attr(__('Add blog to WordPress.com', 'stats')); ?>" /></p>
 			</form>
 <?php	endif; ?>
 
@@ -453,7 +453,7 @@ function stats_admin_page() {
 			<form action="<?php echo stats_admin_path() ?>" method="post">
 				<?php wp_nonce_field('stats'); ?>
 				<p><?php _e('Enter your WordPress.com API key to link this blog to your WordPress.com account. Be sure to use your own API key! Using any other key will lock you out of your stats. (<a href="http://wordpress.com/profile/">Get your key here.</a>)', 'stats'); ?></p>
-				<label for="api_key"><?php _e('API Key:', 'stats'); ?> <input type="text" name="api_key" id="api_key" value="<?php echo $api_key; ?>" /></label>
+				<label for="api_key"><?php _e('API Key:', 'stats'); ?> <input type="text" name="api_key" id="api_key" value="" /></label>
 				<input type="hidden" name="action" value="enter_key" />
 				<p class="submit"><input type="submit" value="<?php _e('Save &raquo;', 'stats'); ?>" /></p>
 			</form>
@@ -524,7 +524,7 @@ function stats_get_blog( ) {
 		'gmt_offset' => get_option('gmt_offset'),
 		'version' => STATS_VERSION
 	);
-	return array_map('wp_specialchars', $blog);
+	return array_map('esc_html', $blog);
 }
 
 function stats_get_post( $post_id ) {
@@ -537,7 +537,7 @@ function stats_get_post( $post_id ) {
 		'title' => $post->post_title,
 		'type' => $post->post_type
 	);
-	return array_map('wp_specialchars', $_post);
+	return array_map('esc_html', $_post);
 }
 
 function stats_client() {
@@ -746,7 +746,7 @@ function stats_register_dashboard_widget_control() {
 		<label for="chart"><?php _e( 'Chart stats by' , 'stats'); ?></label>
 		<select id="chart" name="chart">
 <?php foreach ( $periods as $val => $label ) : ?>
-			<option value="<?php echo $val; ?>"<?php selected( $val, $options['chart'] ); ?>><?php echo wp_specialchars( $label ); ?></option>
+			<option value="<?php echo $val; ?>"<?php selected( $val, $options['chart'] ); ?>><?php echo esc_html( $label ); ?></option>
 <?php endforeach; ?>
 		</select>.
 	</p>
@@ -755,7 +755,7 @@ function stats_register_dashboard_widget_control() {
 		<label for="top"><?php _e( 'Show top posts over' , 'stats'); ?></label>
 		<select id="top" name="top">
 <?php foreach ( $intervals as $val => $label ) : ?>
-			<option value="<?php echo $val; ?>"<?php selected( $val, $options['top'] ); ?>><?php echo wp_specialchars( $label ); ?></option>
+			<option value="<?php echo $val; ?>"<?php selected( $val, $options['top'] ); ?>><?php echo esc_html( $label ); ?></option>
 <?php endforeach; ?>
 		</select>.
 	</p>
@@ -764,7 +764,7 @@ function stats_register_dashboard_widget_control() {
 		<label for="search"><?php _e( 'Show top search terms over' , 'stats'); ?></label>
 		<select id="search" name="search">
 <?php foreach ( $intervals as $val => $label ) : ?>
-			<option value="<?php echo $val; ?>"<?php selected( $val, $options['search'] ); ?>><?php echo wp_specialchars( $label ); ?></option>
+			<option value="<?php echo $val; ?>"<?php selected( $val, $options['search'] ); ?>><?php echo esc_html( $label ); ?></option>
 <?php endforeach; ?>
 		</select>.
 	</p>
@@ -773,7 +773,7 @@ function stats_register_dashboard_widget_control() {
 		<label for="active"><?php _e( 'Show most active posts over' , 'stats'); ?></label>
 		<select id="active" name="active">
 <?php foreach ( $intervals as $val => $label ) : ?>
-			<option value="<?php echo $val; ?>"<?php selected( $val, $options['active'] ); ?>><?php echo wp_specialchars( $label ); ?></option>
+			<option value="<?php echo $val; ?>"<?php selected( $val, $options['active'] ); ?>><?php echo esc_html( $label ); ?></option>
 <?php endforeach; ?>
 		</select>.
 	</p>
@@ -1038,7 +1038,7 @@ function stats_dashboard_widget_content() {
 
 	$searches = array();
 	foreach ( $search_terms = stats_get_csv( 'searchterms', "days=$options[search]$csv_args[search]" ) as $search_term )
-		$searches[] = wp_specialchars($search_term['searchterm']);
+		$searches[] = esc_html($search_term['searchterm']);
 
 ?>
 <div id="stats-info">
@@ -1200,6 +1200,16 @@ if ( stats_get_option('wp_me') ) {
 
 endif;
 
+if ( !function_exists( 'esc_html' ) ):
+	function esc_html( $string ) {
+		return wp_specialchars( $string );
+	}
+endif;
+
+function stats_load_translations() {
+	load_plugin_textdomain( 'stats', null, basename( dirname( __FILE__ ) ) . '/languages' );
+}
+
 add_action( 'wp_dashboard_setup', 'stats_register_dashboard_widget' );
 add_filter( 'wp_dashboard_widgets', 'stats_add_dashboard_widget' );
 
@@ -1209,6 +1219,7 @@ register_activation_hook(__FILE__, 'stats_activate');
 register_deactivation_hook(__FILE__, 'stats_deactivate');
 add_action( 'admin_menu', 'stats_admin_menu' );
 add_action( 'activity_box_end', 'stats_activity', 1 ); // WP < 2.5
+add_action( 'init', 'stats_load_translations' );
 
 // Plant the tracking code in the footer
 add_action( 'wp_footer', 'stats_footer', 101 );

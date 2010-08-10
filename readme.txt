@@ -83,7 +83,8 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 == Changelog ==
 
 = trunk =
-* Add domain to gettext calls
+* Add domain to gettext calls and load_plugin_textdomain (props nbachiyski)
+* Change some escaping functions (props nbachiyski)
 * Remove delete_option from deactivation hook
 
 = 1.7.2 =
