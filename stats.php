@@ -6,6 +6,7 @@ Description: Tracks views, post/page views, referrers, and clicks. Requires a Wo
 Author: Andy Skelton
 Version: 1.7.2
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+Text Domain: stats
 
 Requires WordPress 2.7 or later. Not for use with WPMU.
 

@@ -84,6 +84,7 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 
 = trunk =
 * Add domain to gettext calls and load_plugin_textdomain (props nbachiyski)
+* Add POT file and Text Domain
 * Change some escaping functions (props nbachiyski)
 * Remove delete_option from deactivation hook
 
