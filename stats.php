@@ -21,6 +21,7 @@ if ( is_admin() ) :
 require 'lib/activation.php';
 require 'lib/dashboard.php';
 require 'lib/notices.php';
+require 'lib/admin.php';
 endif;
 
 require 'load.php';
