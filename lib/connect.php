@@ -26,3 +26,7 @@ function stats_multicall_query() {
 	$stats_xmlrpc_client->query();
 }
 
+// TODO
+function stats_is_connected() {
+	return false;
+}
