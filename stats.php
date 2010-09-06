@@ -16,6 +16,7 @@ define( 'STATS_XMLRPC_SERVER', 'http://wordpress.com/xmlrpc.php' );
 require 'lib/options.php';
 require 'lib/metrics.php';
 require 'lib/connect.php';
+require 'lib/shortlinks.php';
 
 if ( is_admin() ) :
 require 'lib/activation.php';
