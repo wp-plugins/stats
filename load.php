@@ -6,7 +6,6 @@ add_filter( 'wp_dashboard_widgets', 'stats_add_dashboard_widget' );
 
 // Boooooooooooring init stuff
 add_action( 'admin_menu', 'stats_admin_menu' );
-add_action( 'activity_box_end', 'stats_activity', 1 ); // WP < 2.5
 add_action( 'init', 'stats_load_translations' );
 
 // Plant the tracking code in the footer
