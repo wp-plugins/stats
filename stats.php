@@ -685,8 +685,8 @@ function stats_activate() {
 }
 
 function stats_deactivate() {
-	//delete_option('stats_options');
-	//delete_option('stats_dashboard_widget');
+	delete_option('stats_options');
+	delete_option('stats_dashboard_widget');
 }
 
 /* Dashboard Stuff: WP >= 2.5 */
