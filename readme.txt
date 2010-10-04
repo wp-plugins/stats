@@ -85,6 +85,7 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 = 1.7 branch =
 * Fix deprecated function call_user_method_array (props Galeforce99)
 * Move data deletion to uninstall hook (props viper007bond)
+* Change "Get your key here" link to apikey.wordpress.com
 
 = 1.7.4 =
 * Reinstate deactivation hook

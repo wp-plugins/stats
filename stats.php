@@ -453,7 +453,7 @@ function stats_admin_page() {
 
 			<form action="<?php echo stats_admin_path() ?>" method="post">
 				<?php wp_nonce_field('stats'); ?>
-				<p><?php _e('Enter your WordPress.com API key to link this blog to your WordPress.com account. Be sure to use your own API key! Using any other key will lock you out of your stats. (<a href="http://wordpress.com/profile/">Get your key here.</a>)', 'stats'); ?></p>
+				<p><?php printf(__('Enter your WordPress.com API key to link this blog to your WordPress.com account. Be sure to use your own API key! Using any other key will lock you out of your stats. (<a href="%s">Get your key here.</a>)', 'stats'), 'https://apikey.wordpress.com/'); ?></p>
 				<label for="api_key"><?php _e('API Key:', 'stats'); ?> <input type="text" name="api_key" id="api_key" value="" /></label>
 				<input type="hidden" name="action" value="enter_key" />
 				<p class="submit"><input type="submit" value="<?php _e('Save &raquo;', 'stats'); ?>" /></p>
