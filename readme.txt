@@ -3,7 +3,7 @@ Contributors: skeltoac, mdawaffe, automattic
 Tags: stats, statistics
 Requires at least: 2.9
 Tested up to: 3.0.1
-Stable tag: 1.7.4
+Stable tag: 1.7.5
 
 You can have simple, concise stats with no additional load on your server by plugging into WordPress.com's stat system.
 
@@ -81,6 +81,11 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 <?php endif; ?>`
 
 == Changelog ==
+
+= 1.7.5 =
+* Fix deprecated function call_user_method_array (props Galeforce99)
+* Move data deletion to uninstall hook (props viper007bond)
+* Change "Get your key here" link to apikey.wordpress.com
 
 = 1.7.4 =
 * Reinstate deactivation hook
