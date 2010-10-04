@@ -684,7 +684,7 @@ function stats_activate() {
 	wp_remote_get(get_bloginfo('siteurl'));
 }
 
-function stats_deactivate() {
+function stats_uninstall() {
 	delete_option('stats_options');
 	delete_option('stats_dashboard_widget');
 }
@@ -1217,7 +1217,7 @@ add_filter( 'wp_dashboard_widgets', 'stats_add_dashboard_widget' );
 
 // Boooooooooooring init stuff
 register_activation_hook(__FILE__, 'stats_activate');
-register_deactivation_hook(__FILE__, 'stats_deactivate');
+register_uninstall_hook(__FILE__, 'stats_uninstall');
 add_action( 'admin_menu', 'stats_admin_menu' );
 add_action( 'activity_box_end', 'stats_activity', 1 ); // WP < 2.5
 add_action( 'init', 'stats_load_translations' );
