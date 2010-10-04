@@ -558,7 +558,7 @@ function stats_add_call() {
 
 	$args = func_get_args();
 
-	call_user_method_array( 'addCall', $stats_xmlrpc_client, $args );
+	call_user_func_array( array( $stats_xmlrpc_client, 'addCall' ), $args );
 }
 
 function stats_multicall_query() {
