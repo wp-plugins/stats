@@ -108,7 +108,7 @@ function stats_footer() {
 	else
 		$a['post'] = '0';
 
-	$http = $_SERVER['HTTPS'] ? 'https' : 'http';
+	$http = is_ssl() ? 'https' : 'http';
 ?>
 <script src="<?php echo $http; ?>://stats.wordpress.com/e-<?php echo gmdate('YW'); ?>.js" type="text/javascript"></script>
 <script type="text/javascript">

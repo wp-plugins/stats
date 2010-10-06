@@ -82,6 +82,9 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 
 == Changelog ==
 
+= 1.7 branch =
+* Fix Notice: Undefined index: HTTPS (props teetilldeath)
+
 = 1.7.5 =
 * Fix deprecated function call_user_method_array (props Galeforce99)
 * Move data deletion to uninstall hook (props viper007bond)
