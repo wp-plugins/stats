@@ -139,7 +139,7 @@ function stats_admin_menu() {
 		}
 	}
 	if ( stats_get_option('blog_id') ) {
-		$hook = add_submenu_page('index.php', __('Site Stats', 'stats'), __('Site Stats', 'stats'), $role, 'stats', 'stats_reports_page');
+		$hook = add_submenu_page('index.php', __('Site Stats', 'stats'), __('Site Stats', 'stats'), $cap, 'stats', 'stats_reports_page');
 		add_action("load-$hook", 'stats_reports_load');
 	}
 	$parent = stats_admin_parent();
