@@ -3,7 +3,7 @@ Contributors: automattic, skeltoac, mdawaffe
 Tags: stats, statistics, views
 Requires at least: 2.8
 Tested up to: 3.1
-Stable tag: 1.8
+Stable tag: 1.8.1
 
 You can have simple, concise stats with no additional load on your server by plugging into WordPress.com's stat system.
 
@@ -81,6 +81,10 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 <?php endif; ?>`
 
 == Changelog ==
+
+= 1.8.1 =
+* Drop SSL from server-to-server requests for stats reports
+* Prepare dashboard widget for upgrade to flot charts
 
 = 1.8 =
 * Fix Notice: Undefined index: HTTPS (props teetilldeath)

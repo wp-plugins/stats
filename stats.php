@@ -4,7 +4,7 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Tracks views, post/page views, referrers, and clicks. Requires a WordPress.com API key.
 Author: Automattic
-Version: 1.8
+Version: 1.8.1
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 Text Domain: stats
 
@@ -231,9 +231,9 @@ function stats_reports_page() {
 
 	if ( isset( $_REQUEST['chart'] ) ) {
 		if ( preg_match('/^[a-z0-9-]+$/', $_REQUEST['chart']) )
-			$url = "https://dashboard.wordpress.com/wp-includes/charts/{$_GET['chart']}.php";
+			$url = "http://dashboard.wordpress.com/wp-includes/charts/{$_GET['chart']}.php";
 	} else {
-		$url = "https://dashboard.wordpress.com/wp-admin/index.php";
+		$url = "http://dashboard.wordpress.com/wp-admin/index.php";
 	}
 
 	$url = add_query_arg($q, $url);
@@ -1030,7 +1030,7 @@ function stats_dashboard_widget_content() {
 		'height' => $_height,
 	);
 
-	$url = 'https://dashboard.wordpress.com/wp-admin/index.php';
+	$url = 'http://dashboard.wordpress.com/wp-admin/index.php';
 
 	$url = add_query_arg($q, $url);
 
@@ -1041,7 +1041,10 @@ function stats_dashboard_widget_content() {
 		$src = clean_url( "$http://dashboard.wordpress.com/wp-admin/index.php?page=estats&blog=$blog_id&noheader=true&chart&unit=$options[chart]&width=$_width&height=$_height" );
 		echo "<iframe id='stats-graph' class='stats-section' frameborder='0' style='width: {$width}px; height: {$height}px; overflow: hidden' src='$src'></iframe>";
 	} else {
-		$body = stats_convert_swf_urls($get['body']);
+		$body = stats_convert_post_titles($get['body']);
+		$body = stats_convert_swf_urls($body);
+		$body = stats_convert_chart_urls($body);
+		$body = stats_convert_image_urls($body);
 		echo $body;
 	}
 
