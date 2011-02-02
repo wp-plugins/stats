@@ -82,6 +82,9 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 
 == Changelog ==
 
+= 1.8 branch =
+* Fix always-on admin_bar option (reported by sillybean)
+
 = 1.8.1 =
 * Drop SSL from server-to-server requests for stats reports
 * Prepare dashboard widget for upgrade to flot charts

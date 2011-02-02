@@ -351,8 +351,7 @@ function stats_admin_load() {
 
 			case 'save_options' :
 				$options = stats_get_options();
-				if ( isset($_POST['admin_bar']) )
-					$options['admin_bar'] = (bool) $_POST['admin_bar'];
+				$options['admin_bar'] = isset($_POST['admin_bar']) && $_POST['admin_bar'];
 				$options['wp_me'] = isset($_POST['wp_me']) && $_POST['wp_me'];
 				$options['reg_users'] = isset($_POST['reg_users']) && $_POST['reg_users'];
 
