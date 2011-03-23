@@ -1007,9 +1007,9 @@ function stats_str_getcsv( $csv ) {
 
 function stats_dashboard_widget_content() {
 	$blog_id = stats_get_option('blog_id');
-	if ( ( !$width  = (int) ( $_GET['width'] / 2 ) ) || $width  < 250 )
+	if ( !isset( $_GET['width'] ) || ( !$width  = (int) ( $_GET['width'] / 2 ) ) || $width  < 250 )
 		$width  = 370;
-	if ( ( !$height = (int) $_GET['height'] - 36 )   || $height < 230 )
+	if ( !isset( $_GET['height'] ) || ( !$height = (int) $_GET['height'] - 36 )   || $height < 230 )
 		$height = 230;
 
 	$_width  = $width  - 5;
