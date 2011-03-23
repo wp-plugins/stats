@@ -541,18 +541,26 @@ function stats_get_posts( $args ) {
 	return $posts;
 }
 
-function stats_get_blog( ) {
-	$home = parse_url( get_option('home') );
+function stats_get_blog() {
+	$home = parse_url( trailingslashit( get_option( 'home' ) ) );
 	$blog = array(
-		'host' => $home['host'],
-		'path' => $home['path'],
-		'name' => get_option('blogname'),
-		'description' => get_option('blogdescription'),
-		'siteurl' => get_option('siteurl'),
-		'gmt_offset' => get_option('gmt_offset'),
-		'version' => STATS_VERSION
+		'host'                => $home['host'],
+		'path'                => $home['path'],
+		'blogname'            => get_option( 'blogname' ),
+		'blogdescription'     => get_option( 'blogdescription' ),
+		'siteurl'             => get_option( 'siteurl' ),
+		'gmt_offset'          => get_option( 'gmt_offset' ),
+		'timezone_string'     => get_option( 'timezone_string' ),
+		'stats_version'       => STATS_VERSION,
+		'stats_api'           => 'jetpack',
+		'page_on_front'       => get_option( 'page_on_front' ),
+		'permalink_structure' => get_option( 'permalink_structure' ),
+		'category_base'       => get_option( 'category_base' ),
+		'tag_base'            => get_option( 'tag_base' ),
 	);
-	return array_map('esc_html', $blog);
+	$blog = array_merge( $blog, stats_get_options() );
+	unset( $blog['roles'], $blog['blog_id'] );
+	return array_map( 'esc_html', $blog );
 }
 
 function stats_get_post( $post ) {
