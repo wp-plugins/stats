@@ -84,6 +84,7 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 
 = 1.8 branch =
 * Fix always-on admin_bar option (reported by sillybean)
+* Send more post data to the API (no content or passwords)
 
 = 1.8.1 =
 * Drop SSL from server-to-server requests for stats reports

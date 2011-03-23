@@ -529,16 +529,16 @@ function stats_xmlrpc_methods( $methods ) {
 
 function stats_get_posts( $args ) {
 	list( $post_ids ) = $args;
-	
 	$post_ids = array_map( 'intval', (array) $post_ids );
-	$r = 'include=' . join(',', $post_ids);
+	$r = array(
+		'include' => $post_ids,
+		'post_type' => 'any',
+		'post_status' => 'any',
+	);
 	$posts = get_posts( $r );
-	$_posts = array();
-
-	foreach ( $post_ids as $post_id )
-		$_posts[$post_id] = stats_get_post($post_id);
-
-	return $_posts;
+	foreach ( $posts as $i => $post )
+		$posts[$i] = stats_get_post( $post );
+	return $posts;
 }
 
 function stats_get_blog( ) {
@@ -555,17 +555,16 @@ function stats_get_blog( ) {
 	return array_map('esc_html', $blog);
 }
 
-function stats_get_post( $post_id ) {
-	$post = get_post( $post_id );
-	if ( empty( $post ) )
-		$post = get_page( $post_id );
-	$_post = array(
-		'id' => $post->ID,
-		'permalink' => get_permalink($post->ID),
-		'title' => $post->post_title,
-		'type' => $post->post_type
-	);
-	return array_map('esc_html', $_post);
+function stats_get_post( $post ) {
+	$post = get_post( $post );
+	if ( $post ) {
+		$post->permalink = get_permalink( $post );
+		$post->post_content = '';
+		$post->post_excerpt = '';
+		$post->post_content_filtered = '';
+		$post->post_password = '';
+	}
+	return $post;
 }
 
 function stats_client() {
