@@ -12,5 +12,7 @@ function stats_notice_connect() {
 		return;
 	if ( is_stats_admin_page() )
 		return;
+	if ( !stats_user_can_admin() )
+		return;
 	echo "<div class='updated' style='background-color:#f66;'><p>" . sprintf(__('<strong>WordPress.com Stats needs attention</strong>: please <a href="%1$s">connect your blog to WordPress.com</a> or disable the plugin.', 'stats'), stats_admin_path()) . "</p></div>";
 }

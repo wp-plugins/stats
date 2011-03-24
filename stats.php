@@ -9,7 +9,7 @@ License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 Text Domain: stats
 */
 
-define( 'STATS_VERSION', '5' );
+define( 'STATS_VERSION', '6' );
 define( 'STATS_FILE', __FILE__ );
 define( 'STATS_XMLRPC_SERVER', 'http://wordpress.com/xmlrpc.php' );
 

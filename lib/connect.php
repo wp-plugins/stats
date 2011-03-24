@@ -26,7 +26,28 @@ function stats_multicall_query() {
 	$stats_xmlrpc_client->query();
 }
 
+function stats_get_secret( $args ) {
+	list($public, $siteurl) = $args;
+	$options = stats_get_options();
+
+	if ( $siteurl != get_option('siteurl') )
+		return array('ok'=>false);
+
+	if ( $options['auth_public'] === $public ) {
+		$result = array(
+			'ok' => 'true',
+			'secret' => $options['auth_secret'],
+		);
+	} else {
+		$result = array(
+			'ok' => 'false',
+		);
+	}
+	return $result;
+}
+
 // TODO
 function stats_is_connected() {
+	return true;
 	return false;
 }

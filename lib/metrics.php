@@ -158,7 +158,8 @@ function convert_post_title($matches) {
 function stats_xmlrpc_methods( $methods ) {
 	$my_methods = array(
 		'wpStats.get_posts' => 'stats_get_posts',
-		'wpStats.get_blog' => 'stats_get_blog'
+		'wpStats.get_blog' => 'stats_get_blog',
+		'wpStats.get_secret' => 'stats_get_secret',
 	);
 
 	return array_merge( $methods, $my_methods );

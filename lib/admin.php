@@ -21,21 +21,31 @@ function stats_admin_path() {
 
 // TODO
 function is_stats_admin_page() {
-	return false;
+	global $pagenow;
+
+	return ( isset($_GET['page']) && $_GET['page'] == 'wpstats' && $pagenow == stats_admin_parent() );
 }
 
-function stats_admin_menu() {
-	global $current_user;
+function stats_user_can_see_reports() {
+	$cap = false;
 	$roles = stats_get_option('roles');
-	$cap = 'administrator';
 	foreach ( $roles as $role ) {
 		if ( current_user_can($role) ) {
 			$cap = $role;
 			break;
 		}
 	}
+	return $cap;
+}
+
+function stats_user_can_admin() {
+	return current_user_can('manage_options');
+}
+
+function stats_admin_menu() {
+	$cap = stats_user_can_see_reports();
 	if ( stats_get_option('blog_id') ) {
-		$hook = add_submenu_page('index.php', __('Site Stats', 'stats'), __('Site Stats', 'stats'), $role, 'stats', 'stats_reports_page');
+		$hook = add_submenu_page('index.php', __('Site Stats', 'stats'), __('Site Stats', 'stats'), $cap, 'stats', 'stats_reports_page');
 		add_action("load-$hook", 'stats_reports_load');
 	}
 	$parent = stats_admin_parent();
@@ -118,10 +128,46 @@ function stats_admin_head() {
 }
 
 function stats_admin_page() {
+?>
+<div class="wrap">
+<h2><?php _e('WordPress.com Stats+Connect', 'stats'); ?></h2>
+<?php
+	$options = stats_get_options();
+	if ( !$options['connected'] )
+		stats_admin_connect_page();
+	else
+		stats_admin_options_page();
+?>
+</div>
+<?php
+}
+
+function stats_admin_connect_page() {
+	$options = stats_get_options();
+	$href = "https://blogamist.wordpress.com/stats.dir/plugin-auth.php";
+	$href = add_query_arg(
+		array(
+			'siteurl' => rawurlencode(get_option( 'siteurl' )),
+			'public' => $options['auth_public'],
+			'locale' => get_locale(),
+		),
+		$href);
+	?>
+<h3><?php _e('Connect to WordPress.com'); ?></h3>
+
+<?php if ( $options['api_key'] ) : ?>
+
+<p><?php printf(__('Your blog is already linked to a WordPress.com account for Stats. Before we activate +Connect, please take a minute to log into WordPress.com and <a href="%1$s">learn about the new features</a>.', 'stats'), $href); ?></p>
+
+<?php else : ?>
+
+<?php endif;
+}
+
+function stats_admin_options_page() {
 	$options = stats_get_options();
 	?>
 	<div class="wrap">
-		<h2><?php _e('WordPress.com Stats', 'stats'); ?></h2>
 		<div class="narrow">
 <?php if ( !empty($options['error']) ) : ?>
 			<div id='statserror'>

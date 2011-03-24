@@ -47,6 +47,8 @@ function stats_upgrade_options( $options ) {
 		'roles'        => array('administrator','editor','author'),
 		'reg_users'    => false,
 		'footer'       => false,
+		'auth_public'  => md5('stats'.mt_rand(1,10000000000)),
+		'auth_secret'  => md5('stats'.mt_rand(1,10000000000)),
 	);
 
 	if ( is_array( $options ) && !empty( $options ) )
