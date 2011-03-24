@@ -86,6 +86,7 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 * Fix always-on admin_bar option (reported by sillybean)
 * Send more post data to the API (no content or passwords)
 * Send more blog data to the API for generating reports
+* Fix API key reset link
 
 = 1.8.1 =
 * Drop SSL from server-to-server requests for stats reports

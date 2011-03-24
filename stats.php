@@ -311,8 +311,8 @@ function stats_convert_post_title($matches) {
 }
 
 function stats_admin_load() {
-	if ( ! empty( $_POST['action'] ) && $_POST['_wpnonce'] == wp_create_nonce('stats') ) {
-		switch( $_POST['action'] ) {
+	if ( ! empty( $_REQUEST['action'] ) && $_REQUEST['_wpnonce'] == wp_create_nonce('stats') ) {
+		switch( $_REQUEST['action'] ) {
 			case 'reset' :
 				stats_set_options(array());
 				wp_redirect( stats_admin_path() );
