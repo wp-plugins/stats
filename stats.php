@@ -558,7 +558,7 @@ function stats_get_blog() {
 		'category_base'       => get_option( 'category_base' ),
 		'tag_base'            => get_option( 'tag_base' ),
 	);
-	$blog = array_merge( $blog, stats_get_options() );
+	$blog = array_merge( stats_get_options(), $blog );
 	unset( $blog['roles'], $blog['blog_id'] );
 	return array_map( 'esc_html', $blog );
 }
