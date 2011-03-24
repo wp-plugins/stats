@@ -3,19 +3,21 @@ Contributors: automattic, skeltoac, mdawaffe
 Tags: stats, statistics, views
 Requires at least: 2.8
 Tested up to: 3.1
-Stable tag: 1.8.1
+Stable tag: 1.8.2
 
-You can have simple, concise stats with no additional load on your server by plugging into WordPress.com's stat system.
+Simple, concise stats with no additional load on your server. Plug into WordPress.com's stats system with this plugin or use Jetpack to bring even more great WordPress.com features to your self-hosted blog.
 
 == Description ==
 
-There are hundreds of plugins and services which can provide statistics about your visitors. However I found that even though something like Google Analytics provides an incredible depth of information, it can be overwhelming and doesn't really highlight what's most interesting to me as a writer. That's why Automattic created its own stats system, to focus on just the most popular metrics a blogger wants to track and provide them in a clear and concise interface.
+There are hundreds of plugins and services which can provide statistics about your visitors. However even though something like Google Analytics provides an incredible depth of information, it can be overwhelming and doesn't really highlight what's most interesting to me as a writer. That's why Automattic created its own stats system, to focus on just the most popular metrics a blogger wants to track and provide them in a clear and concise interface.
 
 Installing this stats plugin is much like installing Akismet, all you need is to put in your [API Key](http://wordpress.com/api-keys/ "You can get a free API key from WordPress.com") and the rest is automatic.
 
 Once it's running it'll begin collecting information about your pageviews, which posts and pages are the most popular, where your traffic is coming from, and what people click on when they leave. It'll also add a link to your dashboard which allows you to see all your stats on a single page. A small chart will appear in your admin bar if you are running WordPress 3.1 or later. And that's it. Less is more.
 
-Finally, because all of the processing and collection runs on our servers and not yours, it doesn't cause any additional load on your hosting account. In fact, it's one of the fastest stats system, hosted or not hosted, that you can use.
+Finally, because all of the processing and collection runs on our servers and not yours, it doesn't cause any additional load on your hosting account. In fact, it's one of the fastest stats system, hosted or not hosted, that you can use. Our stats reports reflect new visits typically within ten seconds.
+
+As we are considering adding great new features, this plugin also puts a Quantcast tracking script on your page.
 
 == Screenshots ==
 
@@ -82,11 +84,12 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 
 == Changelog ==
 
-= 1.8 branch =
+= 1.8.2 =
 * Fix always-on admin_bar option (reported by sillybean)
 * Send more post data to the API (no content or passwords)
 * Send more blog data to the API for generating reports
 * Fix API key reset link
+* Update readme to mention Quantcast and Jetpack
 
 = 1.8.1 =
 * Drop SSL from server-to-server requests for stats reports
