@@ -15,7 +15,7 @@ img#wpstats{display:none}
 
 */
 
-define( 'STATS_VERSION', '6' );
+define( 'STATS_VERSION', '7' );
 
 function stats_get_api_key() {
 	return stats_get_option('api_key');
