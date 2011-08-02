@@ -2,7 +2,7 @@
 Contributors: automattic, skeltoac, mdawaffe
 Tags: stats, statistics, views
 Requires at least: 2.8
-Tested up to: 3.1
+Tested up to: 3.2.1
 Stable tag: 1.8.2
 
 Simple, concise stats with no additional load on your server. Plug into WordPress.com's stats system with this plugin or use Jetpack to bring even more great WordPress.com features to your self-hosted blog.
