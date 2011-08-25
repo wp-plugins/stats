@@ -3,7 +3,7 @@ Contributors: automattic, skeltoac, mdawaffe, tmoorewp
 Tags: stats, statistics, views
 Requires at least: 2.8
 Tested up to: 3.2.1
-Stable tag: 1.8.4
+Stable tag: 1.8.5
 
 Simple, concise stats with no additional load on your server. Plug into WordPress.com's stats system with this plugin or use Jetpack to bring even more great WordPress.com features to your self-hosted blog.
 
@@ -85,6 +85,9 @@ We opened our database for developers to retrieve stats. The API is at `http://s
 <?php endif; ?>`
 
 == Changelog ==
+
+= 1.8.5 =
+* Fixed typo.
 
 = 1.8.4 =
 * Added notice to upgrade to Jetpack
