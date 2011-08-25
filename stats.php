@@ -28,7 +28,7 @@ function stats_fetch_autoinstall_url() {
 	else
 		$auto_url = get_bloginfo( 'url' ) . "/wp-admin/plugin-install.php?tab=search&type=term&s=jetpack&plugin-search-input=Search+Plugins";
 
-	return $auto_url;
+	return esc_url( $auto_url );
 }
 
 function stats_link_plugin_meta( $links, $file ) {
@@ -46,13 +46,19 @@ function stats_link_plugin_meta( $links, $file ) {
 }
 
 function stats_admin_styles() {
-	wp_enqueue_style( 'jetpack', plugins_url( basename( dirname( __FILE__ ) ) . '/_inc/jetpack.css' ), false, '20110719' );
+	wp_enqueue_style( 'jetpack', plugins_url( '_inc/jetpack.css', __FILE__ ), false, '20110824' );
 }
 
 function stats_display_jetpack_nag() {
+	static $shown = false;
+	if ( $shown ) {
+		return;
+	}
+
 	$options = stats_get_options();
 
 	if ( ! $options['dismiss_jetpack_nag'] && ! class_exists( 'Jetpack' ) ) {
+		$shown = true;
 		?>
 					<div id="message" class="updated jetpack-message jp-connect">
 						<div class="squeezer">
@@ -60,7 +66,7 @@ function stats_display_jetpack_nag() {
 								<?php printf( __( 'Future upgrades to WordPress.com Stats will only be available in <a href="%1$s" target="_blank">Jetpack</a>. Jetpack connects your blog to the WordPress.com cloud, <a href="%2$s" target="_blank">enabling awesome features</a>.' ), 'http://jetpack.me/', 'http://jetpack.me/faq/' ); ?>
 							</h4>
 
-							<p class="submit"><a href="' . stats_fetch_autoinstall_url() . '" class="button-primary" id="wpcom-connect">Get Jetpack now!</a></p>
+							<p class="submit"><a href="<?php echo stats_fetch_autoinstall_url(); ?>" class="button-primary" id="wpcom-connect">Get Jetpack now!</a></p>
 						</div>
 					</div>
 		<?php
@@ -1390,4 +1396,3 @@ add_action( 'update_option_permalink_structure', 'stats_flush_posts' );
 add_filter( 'xmlrpc_methods', 'stats_xmlrpc_methods' );
 
 define( 'STATS_XMLRPC_SERVER', 'http://wordpress.com/xmlrpc.php' );
-
