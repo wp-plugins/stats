@@ -4,7 +4,7 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Future upgrades to WordPress.com Stats will only be available in Jetpack.
 Author: Automattic
-Version: 1.8.3
+Version: 1.8.4
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 Text Domain: stats
 
@@ -17,12 +17,12 @@ img#wpstats{display:none}
 
 define( 'STATS_VERSION', '8' );
 
-function display_nag_on_plugin_page() {
+function stats_display_nag_on_plugin_page() {
 	if ( 8 <= STATS_VERSION && strpos( $_SERVER['REQUEST_URI'], 'plugins.php' ) )
 		stats_display_jetpack_nag();
 }
 
-function fetch_autoinstall_url() {
+function stats_fetch_autoinstall_url() {
 	if ( is_multisite() )
 		$auto_url = get_bloginfo( 'url' ) . "/wp-admin/network/plugin-install.php?tab=search&type=term&s=jetpack&plugin-search-input=Search+Plugins";
 	else
@@ -31,21 +31,21 @@ function fetch_autoinstall_url() {
 	return $auto_url;
 }
 
-function link_plugin_meta( $links, $file ) {
+function stats_link_plugin_meta( $links, $file ) {
 	$plugin = plugin_basename( __FILE__ );
 
 	// create link
 	if ( $file == $plugin ) {
 		return array_merge(
 							$links,
-							array( sprintf( '<a href="%1$s">%2$s</a>', fetch_autoinstall_url(), __( 'Get Jetpack Now!' ) ) )
+							array( sprintf( '<a href="%1$s">%2$s</a>', stats_fetch_autoinstall_url(), __( 'Get Jetpack Now!' ) ) )
 						);
 	}
 
 	return $links;
 }
 
-function admin_styles() {
+function stats_admin_styles() {
 	wp_enqueue_style( 'jetpack', plugins_url( basename( dirname( __FILE__ ) ) . '/_inc/jetpack.css' ), false, '20110719' );
 }
 
@@ -60,7 +60,7 @@ function stats_display_jetpack_nag() {
 								<?php printf( __( 'Future upgrades to WordPress.com Stats will only be available in <a href="%1$s" target="_blank">Jetpack</a>. Jetpack connects your blog to the WordPress.com cloud, <a href="%2$s" target="_blank">enabling awesome features</a>.' ), 'http://jetpack.me/', 'http://jetpack.me/faq/' ); ?>
 							</h4>
 
-							<p class="submit"><a href="' . fetch_autoinstall_url() . '" class="button-primary" id="wpcom-connect">Get Jetpack now!</a></p>
+							<p class="submit"><a href="' . stats_fetch_autoinstall_url() . '" class="button-primary" id="wpcom-connect">Get Jetpack now!</a></p>
 						</div>
 					</div>
 		<?php
@@ -201,9 +201,9 @@ function stats_admin_menu() {
 	add_action('admin_notices', 'stats_admin_notices');
 
 	if ( ! class_exists( 'Jetpack' ) ) {
-		add_action( "admin_print_styles", 'admin_styles' );
-		add_action( 'admin_head', 'display_nag_on_plugin_page' );
-		add_filter( 'plugin_row_meta', 'link_plugin_meta', 10, 2 );
+		add_action( "admin_print_styles", 'stats_admin_styles' );
+		add_action( 'admin_head', 'stats_display_nag_on_plugin_page' );
+		add_filter( 'plugin_row_meta', 'stats_link_plugin_meta', 10, 2 );
 	}
 }
 
