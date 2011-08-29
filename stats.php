@@ -23,7 +23,7 @@ function stats_display_nag_on_plugin_page() {
 }
 
 function stats_fetch_autoinstall_url() {
-	if ( is_multisite() )
+	if ( function_exists( 'is_multisite' ) && is_multisite() )
 		$auto_url = get_bloginfo( 'url' ) . "/wp-admin/network/plugin-install.php?tab=search&type=term&s=jetpack&plugin-search-input=Search+Plugins";
 	else
 		$auto_url = get_bloginfo( 'url' ) . "/wp-admin/plugin-install.php?tab=search&type=term&s=jetpack&plugin-search-input=Search+Plugins";
@@ -214,7 +214,7 @@ function stats_admin_menu() {
 }
 
 function stats_admin_parent() {
-	if ( function_exists('is_multisite') && is_multisite() ) {
+	if ( function_exists( 'is_multisite' ) && is_multisite() ) {
 		$menus = get_site_option( 'menu_items' );
 		if ( isset($menus['plugins']) && $menus['plugins'] )
 			return 'plugins.php';
