@@ -17,18 +17,42 @@ img#wpstats{display:none}
 
 define( 'STATS_VERSION', '8' );
 
+function stats_is_plugin_available( $plugin_slug = '', $plugin_name = '', $link_class = '', $link_id = '' ) {
+	if ( empty( $plugin_slug ) )
+		return;
+
+	if ( empty( $plugin_name ) )
+		$plugin_name = 'Activate Plugin';
+
+	$action = '';
+
+	if ( file_exists( WP_PLUGIN_DIR . '/' . $plugin_slug ) ) {
+		$plugins = get_plugins( '/' . $plugin_slug );
+
+		if ( ! empty( $plugins ) ) {
+			$keys = array_keys( $plugins );
+			$plugin_file = $plugin_slug . '/' . $keys[0];
+			$action = '<a 	id="' . esc_attr( $link_id ) . '"
+							class="' . esc_attr( $link_class ) . '"
+							href="' . esc_url( wp_nonce_url( admin_url( 'plugins.php?action=activate&plugin=' . $plugin_file . '&from=plugins' ), 'activate-plugin_' . $plugin_file ) ) .
+							'"title="' . esc_attr__( 'Activate plugin' ) . '"">' . esc_attr( $plugin_name ) . '</a>';
+		}
+	}
+
+	if ( empty( $action ) && function_exists( 'is_main_site' ) && is_main_site() ) {
+			$action = '<a 	id="' . esc_attr( $link_id ) . '"
+							class="thickbox ' . esc_attr( $link_class ) . '"
+							href="' . esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $plugin_slug .
+							'&from=plugins&TB_iframe=true&width=600&height=550' ) ) . '" title="' .
+							esc_attr__('Install plugin') . '">' . esc_attr( $plugin_name ) . '</a>';
+	}
+
+	return $action;
+}
+
 function stats_display_nag_on_plugin_page() {
 	if ( 8 <= STATS_VERSION && strpos( $_SERVER['REQUEST_URI'], 'plugins.php' ) )
 		stats_display_jetpack_nag();
-}
-
-function stats_fetch_autoinstall_url() {
-	if ( function_exists( 'is_multisite' ) && is_multisite() )
-		$auto_url = get_bloginfo( 'url' ) . "/wp-admin/network/plugin-install.php?tab=search&type=term&s=jetpack&plugin-search-input=Search+Plugins";
-	else
-		$auto_url = get_bloginfo( 'url' ) . "/wp-admin/plugin-install.php?tab=search&type=term&s=jetpack&plugin-search-input=Search+Plugins";
-
-	return esc_url( $auto_url );
 }
 
 function stats_link_plugin_meta( $links, $file ) {
@@ -36,9 +60,16 @@ function stats_link_plugin_meta( $links, $file ) {
 
 	// create link
 	if ( $file == $plugin ) {
+		if ( file_exists( WP_PLUGIN_DIR . '/jetpack' ) )
+			$message = __( 'Enable Jetpack Now!' );
+		else
+			$message = __( 'Get Jetpack Now!' );
+
+		$install_link = stats_is_plugin_available( 'jetpack', $message );
+
 		return array_merge(
 							$links,
-							array( sprintf( '<a href="%1$s">%2$s</a>', stats_fetch_autoinstall_url(), __( 'Get Jetpack Now!' ) ) )
+							array( $install_link )
 						);
 	}
 
@@ -47,6 +78,8 @@ function stats_link_plugin_meta( $links, $file ) {
 
 function stats_admin_styles() {
 	wp_enqueue_style( 'jetpack', plugins_url( '_inc/jetpack.css', __FILE__ ), false, '20110824' );
+	wp_enqueue_script( 'thickbox' );
+	wp_enqueue_style( 'thickbox' );
 }
 
 function stats_display_jetpack_nag() {
@@ -59,6 +92,17 @@ function stats_display_jetpack_nag() {
 
 	if ( ! $options['dismiss_jetpack_nag'] && ! class_exists( 'Jetpack' ) ) {
 		$shown = true;
+
+		if ( file_exists( WP_PLUGIN_DIR . '/jetpack' ) )
+			$message = __( 'Enable Jetpack Now!' );
+		else
+			$message = __( 'Get Jetpack Now!' );
+
+		$install_link = stats_is_plugin_available( 'jetpack', $message, 'button-primary', 'wpcom-connect' );
+
+		if ( empty( $install_link ) )
+			$install_link = sprintf( '<a id="wpcom-connect" class="button-primary" href="%1$s">%2$s</a>', 'http://downloads.wordpress.org/plugin/jetpack.latest-stable.zip', __( 'Get Jetpack Now!' ) );
+
 		?>
 					<div id="message" class="updated jetpack-message jp-connect">
 						<div class="squeezer">
@@ -66,7 +110,7 @@ function stats_display_jetpack_nag() {
 								<?php printf( __( 'Future upgrades to WordPress.com Stats will only be available in <a href="%1$s" target="_blank">Jetpack</a>. Jetpack connects your blog to the WordPress.com cloud, <a href="%2$s" target="_blank">enabling awesome features</a>.' ), 'http://jetpack.me/', 'http://jetpack.me/faq/' ); ?>
 							</h4>
 
-							<p class="submit"><a href="<?php echo stats_fetch_autoinstall_url(); ?>" class="button-primary" id="wpcom-connect">Get Jetpack now!</a></p>
+							<p class="submit"><?php echo $install_link ?></p>
 						</div>
 					</div>
 		<?php
