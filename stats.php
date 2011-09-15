@@ -22,7 +22,7 @@ function stats_is_plugin_available( $plugin_slug = '', $plugin_name = '', $link_
 		return;
 
 	if ( empty( $plugin_name ) )
-		$plugin_name = 'Activate Plugin';
+		$plugin_name = __( 'Activate Plugin', 'stats' );
 
 	$action = '';
 
@@ -35,7 +35,7 @@ function stats_is_plugin_available( $plugin_slug = '', $plugin_name = '', $link_
 			$action = '<a 	id="' . esc_attr( $link_id ) . '"
 							class="' . esc_attr( $link_class ) . '"
 							href="' . esc_url( wp_nonce_url( admin_url( 'plugins.php?action=activate&plugin=' . $plugin_file . '&from=plugins' ), 'activate-plugin_' . $plugin_file ) ) .
-							'"title="' . esc_attr__( 'Activate plugin' ) . '"">' . esc_attr( $plugin_name ) . '</a>';
+							'"title="' . esc_attr__( 'Activate Plugin', 'stats' ) . '"">' . esc_attr( $plugin_name ) . '</a>';
 		}
 	}
 
@@ -44,7 +44,7 @@ function stats_is_plugin_available( $plugin_slug = '', $plugin_name = '', $link_
 							class="thickbox ' . esc_attr( $link_class ) . '"
 							href="' . esc_url( network_admin_url( 'plugin-install.php?tab=plugin-information&plugin=' . $plugin_slug .
 							'&from=plugins&TB_iframe=true&width=600&height=550' ) ) . '" title="' .
-							esc_attr__('Install plugin') . '">' . esc_attr( $plugin_name ) . '</a>';
+							esc_attr__( 'Install Plugin', 'stats' ) . '">' . esc_attr( $plugin_name ) . '</a>';
 	}
 
 	return $action;
@@ -61,11 +61,14 @@ function stats_link_plugin_meta( $links, $file ) {
 	// create link
 	if ( $file == $plugin ) {
 		if ( file_exists( WP_PLUGIN_DIR . '/jetpack' ) )
-			$message = __( 'Enable Jetpack Now!' );
+			$message = __( 'Enable Jetpack Now!', 'stats' );
 		else
-			$message = __( 'Get Jetpack Now!' );
+			$message = __( 'Get Jetpack Now!', 'stats' );
 
 		$install_link = stats_is_plugin_available( 'jetpack', $message );
+
+		if ( empty( $install_link ) )
+			$install_link = sprintf( '<a href="%1$s">%2$s</a>', 'http://downloads.wordpress.org/plugin/jetpack.latest-stable.zip', __( 'Get Jetpack Now!', 'stats' ) );
 
 		return array_merge(
 							$links,
@@ -94,20 +97,20 @@ function stats_display_jetpack_nag() {
 		$shown = true;
 
 		if ( file_exists( WP_PLUGIN_DIR . '/jetpack' ) )
-			$message = __( 'Enable Jetpack Now!' );
+			$message = __( 'Enable Jetpack Now!', 'stats' );
 		else
-			$message = __( 'Get Jetpack Now!' );
+			$message = __( 'Get Jetpack Now!', 'stats' );
 
 		$install_link = stats_is_plugin_available( 'jetpack', $message, 'button-primary', 'wpcom-connect' );
 
 		if ( empty( $install_link ) )
-			$install_link = sprintf( '<a id="wpcom-connect" class="button-primary" href="%1$s">%2$s</a>', 'http://downloads.wordpress.org/plugin/jetpack.latest-stable.zip', __( 'Get Jetpack Now!' ) );
+			$install_link = sprintf( '<a id="wpcom-connect" class="button-primary" href="%1$s">%2$s</a>', 'http://downloads.wordpress.org/plugin/jetpack.latest-stable.zip', __( 'Get Jetpack Now!', 'stats' ) );
 
 		?>
 					<div id="message" class="updated jetpack-message jp-connect">
 						<div class="squeezer">
 							<h4>
-								<?php printf( __( 'Future upgrades to WordPress.com Stats will only be available in <a href="%1$s" target="_blank">Jetpack</a>. Jetpack connects your blog to the WordPress.com cloud, <a href="%2$s" target="_blank">enabling awesome features</a>.' ), 'http://jetpack.me/', 'http://jetpack.me/faq/' ); ?>
+								<?php printf( __( 'Future upgrades to WordPress.com Stats will only be available in <a href="%1$s" target="_blank">Jetpack</a>. Jetpack connects your blog to the WordPress.com cloud, <a href="%2$s" target="_blank">enabling awesome features</a>.', 'stats' ), 'http://jetpack.me/', 'http://jetpack.me/faq/' ); ?>
 							</h4>
 
 							<p class="submit"><?php echo $install_link ?></p>
