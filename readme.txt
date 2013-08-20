@@ -5,21 +5,13 @@ Requires at least: 2.8
 Tested up to: 3.2.1
 Stable tag: 1.8.5
 
-Simple, concise stats with no additional load on your server. Plug into WordPress.com's stats system with this plugin or use Jetpack to bring even more great WordPress.com features to your self-hosted blog.
+WordPress.com stats has merged into Jetpack. Please use Jetpack instead of this plugin.
 
 == Description ==
 
-Future upgrades to WordPress.com Stats will only be available in <a href="http://jetpack.me/">Jetpack</a>. Jetpack connects your blog to the WordPress.com cloud, <a href="http://jetpack.me/faq/">enabling awesome features</a>. <a href="http://downloads.wordpress.org/plugin/jetpack.latest-stable.zip">Get Jetpack now!</a>
+WordPress.com stats has merge into Jetpack and all future upgrades to WordPress.com Stats will only be available in <a href="http://jetpack.me/">Jetpack</a>. Jetpack connects your blog to the WordPress.com cloud, <a href="http://jetpack.me/faq/">enabling awesome features</a>. <a href="http://downloads.wordpress.org/plugin/jetpack.latest-stable.zip">Get Jetpack now!</a>
 
-There are hundreds of plugins and services which can provide statistics about your visitors. However even though something like Google Analytics provides an incredible depth of information, it can be overwhelming and doesn't really highlight what's most interesting to me as a writer. That's why Automattic created its own stats system, to focus on just the most popular metrics a blogger wants to track and provide them in a clear and concise interface.
 
-Installing this stats plugin is much like installing Akismet, all you need is to put in your [API Key](http://wordpress.com/api-keys/ "You can get a free API key from WordPress.com") and the rest is automatic.
-
-Once it's running it'll begin collecting information about your pageviews, which posts and pages are the most popular, where your traffic is coming from, and what people click on when they leave. It'll also add a link to your dashboard which allows you to see all your stats on a single page. A small chart will appear in your admin bar if you are running WordPress 3.1 or later. And that's it. Less is more.
-
-Finally, because all of the processing and collection runs on our servers and not yours, it doesn't cause any additional load on your hosting account. In fact, it's one of the fastest stats system, hosted or not hosted, that you can use. Our stats reports reflect new visits typically within ten seconds.
-
-As we are considering adding great new features, this plugin also puts a Quantcast tracking script on your page.
 
 == Screenshots ==
 
@@ -31,13 +23,7 @@ As we are considering adding great new features, this plugin also puts a Quantca
 
 == Installation ==
 
-The automatic plugin installer should work for most people. Manual installation is easy and takes fewer than five minutes.
-
-1. Create a `stats` directory in your `plugins` directory. Typically that's `wp-content/plugins/stats/`.
-2. Into this new directory upload the plugin files (`stats.php`, etc.)
-3. Activate the plugin through the 'Plugins' menu in WordPress.
-4. It will ask you to enter your WordPress.com API key. Don't use somebody else's key!
-5. Sit back and wait a few minutes for your stats to come rolling in.
+Please install <a href="http://jetpack.me">Jetpack</a>.
 
 == Frequently Asked Questions ==
 

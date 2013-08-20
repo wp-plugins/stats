@@ -248,7 +248,7 @@ function stats_admin_menu() {
 		add_action("load-$hook", 'stats_reports_load');
 	}
 	$parent = stats_admin_parent();
-	$hook = add_submenu_page($parent, __('WordPress.com Stats Plugin', 'stats'), __('WordPress.com Stats', 'stats'), 'manage_options', 'wpstats', 'stats_admin_page');
+	//$hook = add_submenu_page($parent, __('WordPress.com Stats Plugin', 'stats'), __('WordPress.com Stats', 'stats'), 'manage_options', 'wpstats', 'stats_admin_page');
 	add_action("load-$hook", 'stats_admin_load');
 	add_action("admin_head-$hook", 'stats_admin_head');
 	add_action('admin_notices', 'stats_admin_notices');
@@ -488,7 +488,7 @@ function stats_admin_load() {
 }
 
 function stats_admin_notices() {
-	stats_notice_blog_id();
+	//stats_notice_blog_id();
 //	stats_notice_footer();
 }
 
