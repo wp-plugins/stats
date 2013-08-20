@@ -3,13 +3,13 @@ Contributors: automattic, skeltoac, mdawaffe, tmoorewp
 Tags: stats, statistics, views
 Requires at least: 2.8
 Tested up to: 3.2.1
-Stable tag: 1.8.5
+Stable tag: 1.8.6
 
 WordPress.com stats has merged into Jetpack. Please use Jetpack instead of this plugin.
 
 == Description ==
 
-WordPress.com stats has merge into Jetpack and all future upgrades to WordPress.com Stats will only be available in <a href="http://jetpack.me/">Jetpack</a>. Jetpack connects your blog to the WordPress.com cloud, <a href="http://jetpack.me/faq/">enabling awesome features</a>. <a href="http://downloads.wordpress.org/plugin/jetpack.latest-stable.zip">Get Jetpack now!</a>
+WordPress.com stats has merged into Jetpack and all future upgrades to WordPress.com Stats will only be available in <a href="http://jetpack.me/">Jetpack</a>. Jetpack connects your blog to the WordPress.com cloud, <a href="http://jetpack.me/faq/">enabling awesome features</a>. <a href="http://downloads.wordpress.org/plugin/jetpack.latest-stable.zip">Get Jetpack now!</a>
 
 
 

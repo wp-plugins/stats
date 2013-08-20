@@ -4,7 +4,7 @@ Plugin Name: WordPress.com Stats
 Plugin URI: http://wordpress.org/extend/plugins/stats/
 Description: Future upgrades to WordPress.com Stats will only be available in Jetpack.
 Author: Automattic
-Version: 1.8.5
+Version: 1.8.6
 License: GPL v2 - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 Text Domain: stats
 
